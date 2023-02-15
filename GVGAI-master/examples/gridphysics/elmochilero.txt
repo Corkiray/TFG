@@ -1,0 +1,69 @@
+BasicGame
+  SpriteSet 
+         
+    avatar > ShootAvatar frameRate=8 img=oryx/swordman1 stype=dropper
+    
+    background > Immovable hidden=True img=oryx/backBlack
+    
+    perceptible >
+     floor > Immovable hidden=True img=oryx/floor3
+ 
+     wall > Immovable autotiling=true img=oryx/wall3
+        
+     doorbackground > Immovable hidden=True img=oryx/door2
+     closedoor  > Door hidden=True img=oryx/doorclosed1
+     opendoor > Door hidden=True img=oryx/dooropen1
+
+     recurso > Resource
+      Null >
+      recurso1 > img=oryx/mineral1 singleton=True
+      recurso2 > img=oryx/mineral2 singleton=True
+      recurso3 > img=oryx/mineral3 singleton=True
+      recurso4 > img=oryx/diamond1 singleton=True
+      recurso5 > img=oryx/diamond2 singleton=True
+      recurso6 > img=oryx/diamond3 singleton=True
+      peso > limit=10
+
+    dropper > Flicker img=oryx/goldsack limit=1 singletone=True
+
+  LevelMapping
+    A > floor avatar background
+    e > floor doorbackground closedoor background
+    w > floor wall background
+    . > floor background
+
+    1 > recurso1 floor background
+    2 > recurso2 floor background
+    3 > recurso3 floor background
+    4 > recurso4 floor background
+    5 > recurso5 floor background
+    6 > recurso6 floor background
+   
+
+  InteractionSet
+    avatar wall  > stepBack
+
+    avatar closedoor > spawnIfHasMore stype=opendoor resource=peso limit=1
+    avatar opendoor > killSprite
+    closedoor opendoor > killSprite
+
+    avatar recurso1 > changeResourceIfHeld heldResource=Null resource=peso value=1 scoreChange=1
+    avatar recurso2 > changeResourceIfHeld heldResource=recurso1 resource=peso value=2 scoreChange=2
+    avatar recurso3 > changeResourceIfHeld heldResource=recurso2 resource=peso value=3 scoreChange=3
+    avatar recurso4 > changeResourceIfHeld heldResource=recurso3 resource=peso value=4 scoreChange=4
+    avatar recurso5 > changeResourceIfHeld heldResource=recurso4 resource=peso value=1 scoreChange=5
+    avatar recurso6 > changeResourceIfHeld heldResource=recurso5 resource=peso value=0 scoreChange=5
+	
+    dropper wall recurso > killSprite
+    
+    dropper floor > transformAndChangeResource stype=recurso1 avatar=avatar resource=peso value=-1 scoreChange=-1
+    dropper floor > transformAndChangeResource stype=recurso2 avatar=avatar resource=peso value=-2 scoreChange=-2
+    dropper floor > transformAndChangeResource stype=recurso3 avatar=avatar resource=peso value=-3 scoreChange=-3
+    dropper floor > transformAndChangeResource stype=recurso4 avatar=avatar resource=peso value=-4 scoreChange=-4
+    dropper floor > transformAndChangeResource stype=recurso5 avatar=avatar resource=peso value=-1 scoreChange=-5
+    dropper floor > transformAndChangeResource stype=recurso6 avatar=avatar resource=peso value=0 scoreChange=-5
+
+    perceptible background > refreshVisionState avatar=avatar range=4
+	
+  TerminationSet
+    SpriteCounter stype=closedoor  win=True
