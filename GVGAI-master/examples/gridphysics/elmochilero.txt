@@ -16,21 +16,25 @@ BasicGame
 
      recurso > Resource
       Null >
-      recurso1 > img=oryx/mineral1 singleton=True
-      recurso2 > img=oryx/mineral2 singleton=True
+      recurso1 > img=israel_set/recurso1 singleton=True
+      recurso2 > img=israel_set/lingotes singleton=True
       recurso3 > img=oryx/mineral3 singleton=True
       recurso4 > img=oryx/diamond1 singleton=True
       recurso5 > img=oryx/diamond2 singleton=True
       recurso6 > img=oryx/diamond3 singleton=True
       peso > limit=10
+      
+     enemy > RandomNPC cooldown=2 cons=6 img=oryx/bat1
 
     dropper > Flicker img=oryx/goldsack limit=1 singletone=True
 
   LevelMapping
     A > floor avatar background
+    E > floor enemy background
     e > floor doorbackground closedoor background
     w > floor wall background
     . > floor background
+    
 
     1 > recurso1 floor background
     2 > recurso2 floor background
@@ -42,6 +46,8 @@ BasicGame
 
   InteractionSet
     avatar wall  > stepBack
+    enemy wall > stepBack
+    avatar enemy > killSprite
 
     avatar closedoor > spawnIfHasMore stype=opendoor resource=peso limit=1
     avatar opendoor > killSprite
@@ -67,3 +73,4 @@ BasicGame
 	
   TerminationSet
     SpriteCounter stype=closedoor  win=True
+    MultiSpriteCounter stype1=avatar stype2=opendoor limit=0 win=False
