@@ -84,7 +84,7 @@ public class VGDLFactory
                     "updateSpawnType", "removeScore", "increaseSpeedToAll", "decreaseSpeedToAll", "setSpeedForAll", "transformToRandomChild",
                     "addHealthPointsToMax", "spawnIfCounterSubTypes", "bounceDirection", "wallBounce", "killIfSlow", "killIfAlive",
                     "waterPhysics", "halfSpeed", "killIfNotUpright", "killIfFast", "wallReverse", "spawnAbove", "spawnLeft", "spawnRight", "spawnBelow",
-                    "changeResourceIfHeld", "transformAndChangeResource", "refreshVisionState"
+                    "changeResourceIfHeld", "transformAndChangeResource", "refreshVisionState", "transformIfAvatarNear", "transformIfAvatarFar"
             };
 
     /**
@@ -102,7 +102,7 @@ public class VGDLFactory
                     AddHealthPointsToMax.class, SpawnIfCounterSubTypes.class, BounceDirection.class, WallBounce.class, KillIfSlow.class,
                     KillIfAlive.class, WaterPhysics.class, HalfSpeed.class, KillIfNotUpright.class, KillIfFast.class, WallReverse.class,
                     SpawnAbove.class, SpawnLeft.class, SpawnRight.class, SpawnBelow.class, 
-                    ChangeResourceIfHeld.class, TransformAndChangeResource.class, RefreshVisionState.class
+                    ChangeResourceIfHeld.class, TransformAndChangeResource.class, RefreshVisionState.class, TransformIfAvatarNear.class, TransformIfAvatarFar.class
             };
 
 

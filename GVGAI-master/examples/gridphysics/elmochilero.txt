@@ -5,11 +5,17 @@ BasicGame
     
     background > Immovable hidden=True img=oryx/backBlack
     
-    perceptible >
-     floor > Immovable hidden=True img=oryx/floor3
- 
-     wall > Immovable autotiling=true img=oryx/wall3
-        
+    floor > Immovable
+     visibleFloor > img=oryx/floor3
+     unknownFloor > hidden=True invisible=True
+     knownFloor > img=oryx/floor1
+    
+    wall > Immovable
+     visibleWall > img=oryx/wall3
+     unknownWall > hidden=True invisible=True
+     knownWall > img=newset/block2
+
+    perceptible >        
      doorbackground > Immovable hidden=True img=oryx/door2
      closedoor  > Door hidden=True img=oryx/doorclosed1
      opendoor > Door hidden=True img=oryx/dooropen1
@@ -23,25 +29,24 @@ BasicGame
       recurso5 > img=oryx/diamond2 singleton=True
       recurso6 > img=oryx/diamond3 singleton=True
       peso > limit=10
-      
+
      enemy > RandomNPC cooldown=2 cons=6 img=oryx/bat1
 
     dropper > Flicker img=oryx/goldsack limit=1 singletone=True
 
   LevelMapping
-    A > floor avatar background
-    E > floor enemy background
-    e > floor doorbackground closedoor background
-    w > floor wall background
-    . > floor background
-    
+    A > unknownFloor avatar background
+    E > unknownFloor enemy background
+    e > unknownFloor doorbackground closedoor background
+    w > unknownWall background
+    . > unknownFloor background
 
-    1 > recurso1 floor background
-    2 > recurso2 floor background
-    3 > recurso3 floor background
-    4 > recurso4 floor background
-    5 > recurso5 floor background
-    6 > recurso6 floor background
+    1 > recurso1 unknownFloor background
+    2 > recurso2 unknownFloor background
+    3 > recurso3 unknownFloor background
+    4 > recurso4 unknownFloor background
+    5 > recurso5 unknownFloor background
+    6 > recurso6 unknownFloor background
    
 
   InteractionSet
@@ -62,7 +67,7 @@ BasicGame
 	
     dropper wall recurso > killSprite
     
-    dropper floor > transformAndChangeResource stype=recurso1 avatar=avatar resource=peso value=-1 scoreChange=-1
+    dropper floor > transformIfAvatarNear stype=recurso1 avatar=avatar resource=peso value=-1 scoreChange=-1
     dropper floor > transformAndChangeResource stype=recurso2 avatar=avatar resource=peso value=-2 scoreChange=-2
     dropper floor > transformAndChangeResource stype=recurso3 avatar=avatar resource=peso value=-3 scoreChange=-3
     dropper floor > transformAndChangeResource stype=recurso4 avatar=avatar resource=peso value=-4 scoreChange=-4
@@ -70,6 +75,14 @@ BasicGame
     dropper floor > transformAndChangeResource stype=recurso6 avatar=avatar resource=peso value=0 scoreChange=-5
 
     perceptible background > refreshVisionState avatar=avatar range=4
+
+    unknownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
+    knownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
+    visibleFloor background > transformIfAvatarFar avatar=avatar range=4 stype=knownFloor
+    
+    unknownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
+    knownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
+    visibleWall background > transformIfAvatarFar avatar=avatar range=4 stype=knownWall
 	
   TerminationSet
     SpriteCounter stype=closedoor  win=True
