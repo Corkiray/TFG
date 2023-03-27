@@ -1,0 +1,87 @@
+modelFile: models/mochilero.mzn
+dzn_dataFile: output/dzn_data/data.dzn
+domainFile: domains/dominioMochilero.pddl
+problemFile: output/problems/problem.pddl
+domainName: dominioMochilero
+pddlCorrespondence:
+  closedoor:
+  - (haySalida)
+  recurso1:
+  - (enSuelo Recurso1)
+  - (= (peso Recurso1) 3)
+  - (= (posicion Recurso1) 1)
+  recurso2:
+  - (enSuelo Recurso2)
+  - (requiere Recurso2 Recurso1)
+  - (= (peso Recurso2) 3)
+  - (= (posicion Recurso2) 2)
+  recurso3:
+  - (enSuelo Recurso3)
+  - (requiere Recurso3 Recurso2)
+  - (= (peso Recurso3) 3)
+  - (= (posicion Recurso3) 3)
+  recurso4:
+  - (enSuelo Recurso4)
+  - (requiere Recurso4 Recurso3)
+  - (= (peso Recurso4) 3)
+  - (= (posicion Recurso4) 4)
+  recurso5:
+  - (enSuelo Recurso5)
+  - (requiere Recurso5 Recurso4)
+  - (= (peso Recurso5) 3)
+  - (= (posicion Recurso5) 5)
+  recurso6:
+  - (enSuelo Recurso6)
+  - (requiere Recurso6 Recurso5)
+  - (= (peso Recurso6) 3)
+  - (= (posicion Recurso6) 6)
+  avatar:
+  - (= (maxPeso) 12)
+  - (= (actualPeso) 0)
+minizincCorrespondence:
+  recurso1:
+      existe:
+      - recurso1=1;
+      no_existe:
+      - recurso1=0;
+  recurso2:
+      existe:
+      - recurso2=1;
+      no_existe:
+      - recurso2=0;
+  recurso3:
+      existe:
+      - recurso3=1;
+      no_existe:
+      - recurso3=0;
+  recurso4:
+      existe:
+      - recurso4=1;
+      no_existe:
+      - recurso4=0;
+  recurso5:
+      existe:
+      - recurso5=1;
+      no_existe:
+      - recurso5=0;
+  recurso6:
+      existe:
+      - recurso6=1;
+      no_existe:
+      - recurso6=0;
+minizinc_to_PDDL_correspondence:
+  default: (not (haySalida))
+  recurso1=1: (enMochila Recurso1)
+  recurso2=1: (enMochila Recurso2)
+  recurso3=1: (enMochila Recurso3)
+  recurso4=1: (enMochila Recurso4)
+  recurso5=1: (enMochila Recurso5)
+  recurso6=1: (enMochila Recurso6)
+pddl_to_agent_correspondence:
+  COGER: take
+  RECURSO1: recurso1
+  RECURSO2: recurso2
+  RECURSO3: recurso3
+  RECURSO4: recurso4
+  RECURSO5: recurso5
+  RECURSO6: recurso6

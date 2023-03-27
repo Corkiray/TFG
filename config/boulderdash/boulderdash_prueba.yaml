@@ -1,0 +1,18 @@
+domainFile: domains/boulderdash_prueba-domain.pddl
+problemFile: problem.pddl
+domainName: BoulderDash
+gameElementsCorrespondence:
+  diamond:
+  - (existe ?g)
+  exitdoor:
+  - (existe ?s)
+variablesTypes:
+  ?g: Gema
+  ?s: Salida
+actionsCorrespondence:
+  COGERGEMA: ACTION_LEFT
+  SALIR: ACTION_LEFT
+goals:
+- goalPredicate: (obtenida g_16_9)(not (existe s_6_11))
+  priority: 1
+  saveGoal: no

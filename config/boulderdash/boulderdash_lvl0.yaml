@@ -1,0 +1,52 @@
+domainFile: domains/boulderdash-domain.pddl
+problemFile: problem.pddl
+domainName: BoulderDash
+gameElementsCorrespondence:
+  exitdoor:
+  - (at ?e ?c)
+  - (terrain-empty ?c)
+  diamond:
+  - (at ?g ?c)
+  - (terrain-empty ?c)
+  - (occupied ?c)
+  avatar:
+  - (at ?p ?c)
+  - (terrain-empty ?c)
+variablesTypes:
+  ?e: Exit
+  ?p: Player
+  ?g: Gem
+  ?c: Cell
+avatarVariable: ?p
+orientationCorrespondence:
+  UP: (oriented-up ?p)
+  DOWN: (oriented-down ?p)
+  LEFT: (oriented-left ?p)
+  RIGHT: (oriented-right ?p)
+connections:
+  UP: (connected-up ?c ?u)
+  DOWN: (connected-down ?c ?d)
+  LEFT: (connected-left ?c ?l)
+  RIGHT: (connected-right ?c ?r)
+actionsCorrespondence:
+  TURN-UP: ACTION_UP
+  TURN-DOWN: ACTION_DOWN
+  TURN-LEFT: ACTION_LEFT
+  TURN-RIGHT: ACTION_RIGHT
+  MOVE-UP: ACTION_UP
+  MOVE-DOWN: ACTION_DOWN
+  MOVE-LEFT: ACTION_LEFT
+  MOVE-RIGHT: ACTION_RIGHT
+  MOVE-UP-GET-GEM: ACTION_UP
+  MOVE-DOWN-GET-GEM: ACTION_DOWN
+  MOVE-LEFT-GET-GEM: ACTION_LEFT
+  MOVE-RIGHT-GET-GEM: ACTION_RIGHT
+  DIG-UP: ACTION_USE
+  DIG-DOWN: ACTION_USE
+  DIG-LEFT: ACTION_USE
+  DIG-RIGHT: ACTION_USE
+  EXIT-LEVEL: null
+goals:
+- goalPredicate: (and (got g_7_9) (got g_9_10) (exited-level))
+  priority: 1
+  saveGoal: no
