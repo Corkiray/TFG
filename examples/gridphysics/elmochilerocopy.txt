@@ -1,0 +1,462 @@
+BasicGame
+  SpriteSet
+    floortype > Immovable randomtiling=0.9 hidden=True img=oryx/floor3
+     floor >
+     r1floor >
+     r2floor >
+     r3floor >
+     r4floor >
+     r5floor >
+     r6floor >
+     r1get > img=oryx/floor1
+     r1check > img=oryx/floor2
+     r2get > img=oryx/floor1
+     r2check > img=oryx/floor2
+     r3get > img=oryx/floor1
+     r3check > img=oryx/floor2
+   
+    r1generator > Immovable hidden=True img=oryx/floor1
+    r1generatorDef > Immovable hidden=True img=oryx/floor2
+    goal  > Door color=GREEN img=oryx/doorclosed1
+
+    avatar > frameRate=8 img=oryx/swordman1
+     mainAvatar > MovingAvatar
+     waitAvatar > MissileAvatar orientation=UP
+     quitAvatar > MovingAvatar
+     r1genAvatar > MovingAvatar
+     
+    wall > Immovable autotiling=true img=oryx/wall3
+
+    peso > Resource limit=5
+
+    recurso > Resource
+     recurso1 > limit=1 img=oryx/mineral1
+     recurso2 > limit=1 img=oryx/mineral2
+     recurso3 > limit=1 img=oryx/mineral3
+     recurso4 > limit=1 img=oryx/diamond1
+     recurso5 > limit=1 img=oryx/diamond2
+     recurso6 > limit=1 img=oryx/diamond3
+       
+	
+  LevelMapping
+    A > mainAvatar floor
+    e > floor goal
+    w > wall
+    . > floor
+
+    1 > recurso1 r1floor
+    2 > recurso2 r2floor
+    3 > recurso3 r3floor
+    4 > recurso4 r4floor
+    5 > recurso5 r5floor
+    6 > recurso6 r6floor
+         
+
+  InteractionSet
+    avatar wall  > stepBack
+        
+    goal avatar > killIfOtherHasMore resource=peso limit=10
+
+
+
+    quitAvatar floor > transformTo stype=mainAvatar
+
+
+
+    waitAvatar r1floor > transformIfCount stype=quitAvatar stypeCount=recurso1 geq=1
+    recurso1 mainAvatar > collectResource
+    mainAvatar r1floor > transformTo stype=waitAvatar
+    r1floor waitAvatar > transformIfCount stype=r1get stypeCount=recurso1 leq=0
+    waitAvatar r1get > changeResource resource=peso value=1 scoreChange=1
+    r1get waitAvatar > transformTo stype=r1check
+    waitAvatar r1check > spawnIfHasLess stype=floor resource=peso limit=2
+    r1check floor > killSprite
+    waitAvatar r1check > spawnIfHasMore stype=r1generator resource=peso limit=3
+    r1check r1generator > killSprite
+    waitAvatar floor > transformTo stype=mainAvatar
+    
+  
+    r1generator waitAvatar > transformIfCount stype=r2generator stypeCount=recurso1 geq=1
+    r1generator waitAvatar > transformIfCount stype=r1generatorDef stypeCount=recurso1 leq=0
+    waitAvatar r1generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r1generatorDef > changeResource resource=recurso1 value=-1
+    waitAvatar r1generatorDef > transformTo stype=r1genAvatar
+    r1genAvatar floor > transformTo stype=mainAvatar 
+    floor r1genAvatar > spawnBehind stype=recurso1
+    r1generatorDef recurso1 > transformTo stype=r1floor
+    
+    
+    
+    
+    
+    
+    waitAvatar r2floor > transformIfCount stype=quitAvatar stypeCount=recurso2 geq=1
+    recurso2 mainAvatar > collectResourceIfHeld heldResource=recurso1
+    mainAvatar r2floor > transformTo stype=waitAvatar
+    r2floor waitAvatar > transformIfCount stype=r2get stypeCount=recurso2 leq=0
+    waitAvatar r2get > changeResource resource=peso value=1 scoreChange=1
+    r2get waitAvatar > transformTo stype=r2check
+    waitAvatar r2check > spawnIfHasLess stype=floor resource=peso limit=2
+    r2check floor > killSprite
+    waitAvatar r2check > spawnIfHasMore stype=r1generator resource=peso limit=3
+    r2check r2generator > killSprite
+    waitAvatar floor > transformTo stype=mainAvatar
+    
+  
+    r2generator waitAvatar > transformIfCount stype=r2generator stypeCount=recurso2 geq=1
+    r2generator waitAvatar > transformIfCount stype=r2generatorDef stypeCount=recurso2 leq=0
+    waitAvatar r2generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r2generatorDef > changeResource resource=recurso2 value=-1
+    waitAvatar r2generatorDef > transformTo stype=r2genAvatar
+    r2genAvatar floor > transformTo stype=mainAvatar 
+    floor r2genAvatar > spawnBehind stype=recurso2
+    r2generatorDef recurso2 > transformTo stype=r2floor
+    
+       
+
+
+
+
+
+    waitAvatar r3floor > transformIfCount stype=quitAvatar stypeCount=recurso3 geq=1
+    recurso3 mainAvatar > collectResourceIfHeld heldResource=recurso2
+    mainAvatar r3floor > transformTo stype=waitAvatar
+    r3floor waitAvatar > transformIfCount stype=r3get stypeCount=recurso3 leq=0
+    waitAvatar r3get > changeResource resource=peso value=1 scoreChange=1
+    r3get waitAvatar > transformTo stype=r3check
+    waitAvatar r3check > spawnIfHasLess stype=floor resource=peso limit=2
+    r3check floor > killSprite
+    waitAvatar r3check > spawnIfHasMore stype=r1generator resource=peso limit=3
+    r3check r3generator > killSprite
+    waitAvatar floor > transformTo stype=mainAvatar
+    
+  
+    r3generator waitAvatar > transformIfCount stype=r3generator stypeCount=recurso3 geq=1
+    r3generator waitAvatar > transformIfCount stype=r3generatorDef stypeCount=recurso3 leq=0
+    waitAvatar r3generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r3generatorDef > changeResource resource=recurso3 value=-1
+    waitAvatar r3generatorDef > transformTo stype=r3genAvatar
+    r3genAvatar floor > transformTo stype=mainAvatar 
+    floor r3genAvatar > spawnBehind stype=recurso3
+    r3generatorDef recurso3 > transformTo stype=r3floor
+    
+    
+    
+    
+    
+    
+   
+    
+    
+    
+
+    //item1 avatar > spawnIfHasLess stype=recurso1 resource=peso limit=9
+    //recurso1 avatar > collectResource
+    //r1floor floor > transformIfCount stype=r1floorp stypeCount=recurso1 leq=0
+    //avatar r1floorp > changeResource resource=peso value=1 scoreChange=1
+    //r1floorp avatar > transformTo stype=floor
+    //recurso1 floor > killSprite
+        
+    //recurso2 avatar > collectResourceIfHeld heldResource=recurso1
+    //r2floor floor > transformIfCount stype=r2floorp stypeCount=recurso2 leq=0
+    //avatar r2floorp > changeResource resource=peso value=1 scoreChange=1
+    //r2floorp avatar > transformTo stype=floor
+    
+    
+    //recurso3 avatar > collectResourceIfHeld heldResource=recurso2
+    //r3floor floor > transformIfCount stype=r3floorp stypeCount=recurso3 leq=0
+    //avatar r3floorp > changeResource resource=peso value=1 scoreChange=1
+    //r3floorp avatar > transformTo stype=floor
+
+    //r3checkpoint avatar > spawnBehind stype=generator
+
+
+    //recurso4 avatar > collectResourceIfHeld heldResource=recurso3
+    //r4floor floor > transformIfCount stype=r4floorp stypeCount=recurso4 leq=0
+    //avatar r4floorp > changeResource resource=peso value=1 scoreChange=1
+    //r4floorp avatar > transformTo stype=floor
+
+
+    //recurso5 avatar > collectResourceIfHeld heldResource=recurso4
+    //r5floor floor > transformIfCount stype=r5floorp stypeCount=recurso5 leq=0
+    //avatar r5floorp > changeResource resource=peso value=1 scoreChange=1
+    //r5floorp avatar > transformTo stype=floor
+
+
+    //recurso6 avatar > collectResourceIfHeld heldResource=recurso5
+    //r6floor floor > transformIfCount stype=r6floorp stypeCount=recurso6 leq=0
+    //avatar r6floorp > changeResource resource=peso value=1 scoreChange=1
+    //r6floorp avatar > transformTo stype=floor
+
+    //generator floor > transformIfCount stype=r1floor stypeCount=recurso1 leq=1
+
+
+    //r1checkpoint avatar > transformIfCount stype=r1floorp stypeCount=recurso1 leq=0
+    //avatar r1floorp > changeResource resource=peso value=1 scoreChange=1
+    //r1floorp avatar > transformTo stype=floor
+
+    //avatar r3floor > spawnIfHasMore stype=r1generator resource=peso limit=3
+    //r1generator floor > transformTo stype=recurso1
+    //r1generator floor > transformIfCount stype=floor stypeCount=recurso1 geq=1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+    /r6generator waitAvatar > transformIfCount stype=r2generator stypeCount=recurso6 geq=1
+    /r6generator waitAvatar > transformIfCount stype=r6generatorDef stypeCount=recurso6 leq=0
+    waitAvatar r6generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    /waitAvatar r6generatorDef > changeResource resource=recurso6 value=-1
+    /waitAvatar r6generatorDef > transformTo stype=r6genAvatar
+    /r6genAvatar floor > transformTo stype=mainAvatar 
+    /floor r6genAvatar > spawnBehind stype=recurso6
+    /r6generatorDef recurso6 > transformTo stype=r6floor
+
+
+
+    
+       
+    
+  	/r2generatorPre r2gen > transformTo stype=r3generator
+  	/r2generatorPre waitAvatar > transformIfCount stype=r1generator stypeCount=r2gen leq=0  
+    /r2generator waitAvatar > transformIfCount stype=r3generatorPre stypeCount=recurso2 geq=1
+    /r2generator waitAvatar > transformIfCount stype=r2generatorDef stypeCount=recurso2 leq=0
+    /waitAvatar r2generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    /waitAvatar r2generatorDef > changeResource resource=recurso2 value=-1
+    /waitAvatar r2generatorDef > transformTo stype=r2genAvatar
+    /r2genAvatar floor > transformTo stype=mainAvatar 
+    /floor r2genAvatar > spawnBehind stype=recurso2
+    /r2generatorDef recurso2 > transformTo stype=r2floor
+           
+    
+
+
+        
+    
+    /waitAvatar r3floor > transformIfCount stype=quitAvatar stypeCount=recurso3 geq=1
+    /recurso3 mainAvatar > collectResourceIfHeld heldResource=recurso2
+    /mainAvatar r3floor > transformTo stype=waitAvatar
+    /r3floor waitAvatar > transformIfCount stype=r3get stypeCount=recurso3 leq=0
+    /waitAvatar r3get > changeResource resource=peso value=1 scoreChange=1
+    /r3get waitAvatar > transformTo stype=r3check
+    /waitAvatar r3check > spawnIfHasLess stype=floor resource=peso limit=2
+    /r3check floor > killSprite
+    /waitAvatar r3check > spawnIfHasMore stype=r1generator resource=peso limit=3
+    /r3check r1generator > killSprite
+    /waitAvatar floor > transformTo stype=mainAvatar
+    
+  
+    /r3generator waitAvatar > transformIfCount stype=r4generator stypeCount=recurso3 geq=1
+    /r3generator waitAvatar > transformIfCount stype=r3generatorDef stypeCount=recurso3 leq=0
+    /waitAvatar r3generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    /waitAvatar r3generatorDef > changeResource resource=recurso3 value=-1
+    /waitAvatar r3generatorDef > transformTo stype=r3genAvatar
+    /r3genAvatar floor > transformTo stype=mainAvatar 
+    /floor r3genAvatar > spawnBehind stype=recurso3
+    /r3generatorDef recurso3 > transformTo stype=r3floor
+    
+    
+    
+    
+   
+    /waitAvatar r4floor > transformIfCount stype=quitAvatar stypeCount=recurso4 geq=1
+    /recurso4 mainAvatar > collectResourceIfHeld heldResource=recurso3
+    /mainAvatar r4floor > transformTo stype=waitAvatar
+    /r4floor waitAvatar > transformIfCount stype=r4get stypeCount=recurso4 leq=0
+    /waitAvatar r4get > changeResource resource=peso value=1 scoreChange=1
+    /r4get waitAvatar > transformTo stype=r4check
+    /waitAvatar r4check > spawnIfHasLess stype=floor resource=peso limit=2
+    /r4check floor > killSprite
+    /waitAvatar r4check > spawnIfHasMore stype=r1generator resource=peso limit=3
+    /r4check r1generator > killSprite
+    /waitAvatar floor > transformTo stype=mainAvatar
+    
+  
+    /r4generator waitAvatar > transformIfCount stype=r5generator stypeCount=recurso4 geq=1
+    /r4generator waitAvatar > transformIfCount stype=r4generatorDef stypeCount=recurso4 leq=0
+    /waitAvatar r4generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    /waitAvatar r4generatorDef > changeResource resource=recurso4 value=-1
+    /waitAvatar r4generatorDef > transformTo stype=r4genAvatar
+    /r4genAvatar floor > transformTo stype=mainAvatar 
+    /floor r4genAvatar > spawnBehind stype=recurso4
+    /r4generatorDef recurso4 > transformTo stype=r4floor
+    
+    
+    
+    
+    
+    
+    /waitAvatar r5floor > transformIfCount stype=quitAvatar stypeCount=recurso5 geq=1
+    /recurso5 mainAvatar > collectResourceIfHeld heldResource=recurso4
+    /mainAvatar r5floor > transformTo stype=waitAvatar
+    /r5floor waitAvatar > transformIfCount stype=r5get stypeCount=recurso5 leq=0
+    /waitAvatar r5get > changeResource resource=peso value=1 scoreChange=1
+    /r5get waitAvatar > transformTo stype=r5check
+    /waitAvatar r5check > spawnIfHasLess stype=floor resource=peso limit=2
+    /r5check floor > killSprite
+    /waitAvatar r5check > spawnIfHasMore stype=r1generator resource=peso limit=3
+    /r5check r1generator > killSprite
+    /waitAvatar floor > transformTo stype=mainAvatar
+    
+  
+    /r5generator waitAvatar > transformIfCount stype=r6generator stypeCount=recurso5 geq=1
+    /r5generator waitAvatar > transformIfCount stype=r5generatorDef stypeCount=recurso5 leq=0
+    /waitAvatar r5generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    /waitAvatar r5generatorDef > changeResource resource=recurso5 value=-1
+    /waitAvatar r5generatorDef > transformTo stype=r5genAvatar
+    /r5genAvatar floor > transformTo stype=mainAvatar 
+    /floor r5genAvatar > spawnBehind stype=recurso5
+    /r5generatorDef recurso5 > transformTo stype=r5floor
+    
+    
+    
+    
+    
+    
+    /waitAvatar r6floor > transformIfCount stype=quitAvatar stypeCount=recurso6 geq=1
+    /recurso6 mainAvatar > collectResourceIfHeld heldResource=recurso5
+    /mainAvatar r6floor > transformTo stype=waitAvatar
+    /r6floor waitAvatar > transformIfCount stype=r6get stypeCount=recurso6 leq=0
+    /waitAvatar r6get > changeResource resource=peso value=1 scoreChange=1
+    /r6get waitAvatar > transformTo stype=r6check
+    /waitAvatar r6check > spawnIfHasLess stype=floor resource=peso limit=2
+    /r6check floor > killSprite
+    /waitAvatar r6check > spawnIfHasMore stype=r1generator resource=peso limit=3
+    /r6check r1generator > killSprite
+    /waitAvatar floor > transformTo stype=mainAvatar
+    
+  
+    /r6generator waitAvatar > transformIfCount stype=r2generator stypeCount=recurso6 geq=1
+    /r6generator waitAvatar > transformIfCount stype=r6generatorDef stypeCount=recurso6 leq=0
+    /waitAvatar r6generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    /waitAvatar r6generatorDef > changeResource resource=recurso6 value=-1
+    /waitAvatar r6generatorDef > transformTo stype=r6genAvatar
+    /r6genAvatar floor > transformTo stype=mainAvatar 
+    /floor r6genAvatar > spawnBehind stype=recurso6
+    /r6generatorDef recurso6 > transformTo stype=r6floor
+    
+    
+  	r1generatorPre r1gen > transformTo stype=r2generator
+    
+       
+  	r1generatorPre waitAvatar > transformIfCount stype=r1generator stypeCount=r1gen leq=0
+  	r1generator waitAvatar > transformIfCount stype=r2generatorPre stypeCount=recurso1 geq=1
+  	r1generator waitAvatar > transformIfCount stype=r1generatorDef stypeCount=recurso1 leq=1
+    waitAvatar r1generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r1generatorDef > changeResource resource=recurso1 value=-1
+    waitAvatar r1generatorDef > transformTo stype=r1genAvatar
+    floor r1genAvatar > spawnBehind stype=recurso1
+           
+    
+    r1genAvatar floor > transformTo stype=mainAvatar
+    r1generatorDef recurso1 > transformTo stype=r1floor
+    
+    prueba avatar > killSprite
+
+
+
+
+
+
+
+    r2generatorPre r2gen > transformTo stype=r3generator
+    r2generatorPre waitAvatar > transformIfCount stype=r2generator stypeCount=r2gen leq=0
+    r2generator waitAvatar > transformIfCount stype=r2generatorDef stypeCount=recurso2 leq=0
+    r2generator waitAvatar > transformIfCount stype=r3generatorPre stypeCount=recurso2 geq=1
+    waitAvatar r2generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r2generatorDef > changeResource resource=recurso2 value=-1
+    waitAvatar r2generatorDef > transformTo stype=r2genAvatar
+    floor r2genAvatar > spawnBehind stype=recurso2   
+    r2generatorDef recurso2 > transformTo stype=r2floor
+    r2genAvatar floor > transformTo stype=mainAvatar
+    
+    
+    
+    r3generatorPre r3gen > transformTo stype=r4generator
+    r3generatorPre waitAvatar > transformIfCount stype=r3generator stypeCount=r3gen leq=0
+    r3generator waitAvatar > transformIfCount stype=r3generatorDef stypeCount=recurso3 leq=0
+    r3generator waitAvatar > transformIfCount stype=r4generatorPre stypeCount=recurso3 geq=1
+    waitAvatar r3generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r3generatorDef > changeResource resource=recurso3 value=-1
+    waitAvatar r3generatorDef > transformTo stype=r3genAvatar
+    floor r3genAvatar > spawnBehind stype=recurso3   
+    r3generatorDef recurso3 > transformTo stype=r3floor
+    r3genAvatar floor > transformTo stype=mainAvatar    
+    prueba avatar > killSprite
+	
+    
+
+    r4generatorPre r4gen > transformTo stype=r5generator
+    r4generatorPre waitAvatar > transformIfCount stype=r4generator stypeCount=r4gen leq=0
+    r4generator waitAvatar > transformIfCount stype=r4generatorDef stypeCount=recurso4 leq=0
+    r4generator waitAvatar > transformIfCount stype=r5generatorPre stypeCount=recurso4 geq=1
+    waitAvatar r4generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r4generatorDef > changeResource resource=recurso4 value=-1
+    waitAvatar r4generatorDef > transformTo stype=r4genAvatar
+    floor r4genAvatar > spawnBehind stype=recurso4   
+    r4generatorDef recurso4 > transformTo stype=r4floor
+    r4genAvatar floor > transformTo stype=mainAvatar    
+    prueba avatar > killSprite    
+    
+    
+    r5generatorPre r5gen > transformTo stype=r6generator
+    r5generatorPre waitAvatar > transformIfCount stype=r5generator stypeCount=r5gen leq=0
+    r5generator waitAvatar > transformIfCount stype=r5generatorDef stypeCount=recurso5 leq=0
+    r5generator waitAvatar > transformIfCount stype=r6generatorPre stypeCount=recurso5 geq=1
+    waitAvatar r5generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r5generatorDef > changeResource resource=recurso5 value=-1
+    waitAvatar r5generatorDef > transformTo stype=r5genAvatar
+    floor r5genAvatar > spawnBehind stype=recurso5   
+    r5generatorDef recurso5 > transformTo stype=r5floor
+    r5genAvatar floor > transformTo stype=mainAvatar    
+    prueba avatar > killSprite        
+
+
+    r6generatorPre r6gen > transformTo stype=r1generator
+    r6generatorPre waitAvatar > transformIfCount stype=r6generator stypeCount=r6gen leq=0
+    r6generator waitAvatar > transformIfCount stype=r6generatorDef stypeCount=recurso6 leq=0
+    r6generator waitAvatar > transformIfCount stype=r1generatorPre stypeCount=recurso6 geq=1
+    waitAvatar r6generatorDef > changeResource resource=peso value=-1 scoreChange=-1
+    waitAvatar r6generatorDef > changeResource resource=recurso6 value=-1
+    waitAvatar r6generatorDef > transformTo stype=r6genAvatar
+    floor r6genAvatar > spawnBehind stype=recurso6   
+    r6generatorDef recurso6 > transformTo stype=r6floor
+    r6genAvatar floor > transformTo stype=mainAvatar    
+    prueba avatar > killSprite    
+
+
+  TerminationSet
+    SpriteCounter stype=goal   win=True

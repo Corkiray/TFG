@@ -1,0 +1,103 @@
+BasicGame
+  SpriteSet 
+         
+    avatar > ShootAvatar frameRate=8 img=oryx/swordman1 stype=dropper
+    
+    background > Immovable hidden=True img=oryx/backBlack
+    
+    floor > Immovable
+     visibleFloor > img=oryx/floor3
+     unknownFloor > hidden=True invisible=True
+     knownFloor > img=oryx/floor1
+    
+    wall > Immovable
+     visibleWall > img=oryx/wall3
+     unknownWall > hidden=True invisible=True
+     knownWall > img=newset/block2
+
+    doorbackground > Immovable hidden=True img=oryx/door2
+    closedoor  > Door img=oryx/doorclosed1
+    opendoor > Door img=oryx/dooropen1
+
+    recurso > Resource
+     Null >
+     recurso1 > img=israel_set/recurso1 singleton=True
+     recurso2 > img=israel_set/recurso2 singleton=True
+     recurso3 > img=israel_set/recurso3 singleton=True
+     recurso4 > img=israel_set/recurso4 singleton=True
+     recurso5 > img=israel_set/recurso5 singleton=True
+     recurso6 > img=israel_set/recurso6 singleton=True
+     peso > limit=10
+     
+    rkey > Resource hidden=True invisible=True
+     r1key >
+     r2key >
+     r3key >
+     r4key >
+     r5key >
+     r6key >
+     
+    enemy > RandomNPC cooldown=3 cons=6 img=oryx/bat1
+
+    dropper > Flicker img=oryx/goldsack limit=1 singletone=True
+
+  LevelMapping
+    A > unknownFloor avatar background
+    E > unknownFloor enemy background
+    e > unknownFloor doorbackground closedoor background
+    w > unknownWall background
+    . > unknownFloor background
+
+    1 > recurso1 r1key unknownFloor background
+    2 > recurso2 r2key unknownFloor background
+    3 > recurso3 r3key unknownFloor background
+    4 > recurso4 r4key unknownFloor background
+    5 > recurso5 r5key unknownFloor background
+    6 > recurso6 r6key unknownFloor background
+   
+
+  InteractionSet
+    avatar wall  > stepBack
+    enemy wall > stepBack
+    avatar enemy > killSprite
+
+    avatar closedoor > spawnIfHasMore stype=opendoor resource=peso limit=1
+    avatar opendoor > killSprite
+    closedoor opendoor > killSprite
+
+    avatar r1key > killIfHeld heldResource=Null
+    avatar r2key > killIfHeld heldResource=r1key
+    avatar r3key > killIfHeld heldResource=r2key
+    avatar r4key > killIfHeld heldResource=r3key
+    avatar r5key > killIfHeld heldResource=r4key
+    avatar r6key > killIfHeld heldResource=r5key
+
+    avatar recurso1 > changeResourceIfHeld heldResource=Null resource=peso value=1 scoreChange=1
+    avatar recurso2 > changeResourceIfHeld heldResource=r1key resource=peso value=2 scoreChange=2
+    avatar recurso3 > changeResourceIfHeld heldResource=r2key resource=peso value=3 scoreChange=3
+    avatar recurso4 > changeResourceIfHeld heldResource=r3key resource=peso value=4 scoreChange=4
+    avatar recurso5 > changeResourceIfHeld heldResource=r4key resource=peso value=1 scoreChange=5
+    avatar recurso6 > changeResourceIfHeld heldResource=r5key resource=peso value=0 scoreChange=5
+			
+    dropper wall recurso > killSprite
+    
+    dropper floor > transformAndChangeResource stype=recurso1 avatar=avatar resource=peso value=-1 scoreChange=-1
+    dropper floor > transformAndChangeResource stype=recurso2 avatar=avatar resource=peso value=-2 scoreChange=-2
+    dropper floor > transformAndChangeResource stype=recurso3 avatar=avatar resource=peso value=-3 scoreChange=-3
+    dropper floor > transformAndChangeResource stype=recurso4 avatar=avatar resource=peso value=-4 scoreChange=-4
+    dropper floor > transformAndChangeResource stype=recurso5 avatar=avatar resource=peso value=-1 scoreChange=-5
+    dropper floor > transformAndChangeResource stype=recurso6 avatar=avatar resource=peso value=0 scoreChange=-5
+
+    enemy background > refreshVisionState avatar=avatar range=4
+
+    unknownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
+    knownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
+    visibleFloor background > transformIfAvatarFar avatar=avatar range=4 stype=knownFloor
+    
+    unknownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
+    knownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
+    visibleWall background > transformIfAvatarFar avatar=avatar range=4 stype=knownWall
+	
+  TerminationSet
+    SpriteCounter stype=closedoor  win=True
+    MultiSpriteCounter stype1=avatar stype2=opendoor limit=0 win=False
