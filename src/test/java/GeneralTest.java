@@ -56,7 +56,7 @@ public class GeneralTest {
 		String controller = "controller.MainAgent";
 
 		// Find out if the game has to be played by a human or by the agent
-		boolean humanPlayer = false;
+		boolean humanPlayer = true;
 
 		// Play game
 		if (humanPlayer) {
