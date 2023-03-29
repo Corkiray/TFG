@@ -85,3 +85,4 @@ pddl_to_agent_correspondence:
   RECURSO4: recurso4
   RECURSO5: recurso5
   RECURSO6: recurso6
+  SALIR: exit

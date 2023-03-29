@@ -1,3 +1,4 @@
+package agent;
 
 
 import java.util.Random;
@@ -12,7 +13,7 @@ import tracks.ArcadeMachine;
 
 @Command(name = "GVGAI-PDDL", description = "Launches a new GVGAI game played by a planning agent or by a human.",
 		 mixinStandardHelpOptions = true, version = "1.0")
-public class GeneralTest {
+public class Main {
 
 	private int gameIdx = 122;
 
@@ -26,7 +27,7 @@ public class GeneralTest {
 
     public static void main(String[] args) {
     	// Load commandline arguments
-    	GeneralTest test = new GeneralTest();
+    	Main test = new Main();
     	CommandLine commandLine = new CommandLine(test);
     	commandLine.parseArgs(args);
 
