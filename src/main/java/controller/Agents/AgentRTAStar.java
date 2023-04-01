@@ -33,7 +33,7 @@ public class AgentRTAStar{
 	 * @param stateObs Observation of the current state.
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
-	public AgentRTAStar(StateObservation state, ElapsedCpuTimer timer) {	
+	public AgentRTAStar() {	
 		//Inicializo lista de nodos
 		explorados = new ArrayList<Node>();
 		

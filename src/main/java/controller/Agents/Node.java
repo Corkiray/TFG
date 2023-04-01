@@ -32,11 +32,14 @@ public class Node {
 	int y; //Posición en el eje y dentro del mapa del juego
 	Node padre; //Nodo padre
 	public ACTIONS accion; //Acción que se realizó para llegar a e´l
-	public int f; //(g + h)
-	public int g; //Coste para ir del nodo inicial a este
-	public int h; //coste hurístico para llegar
+	public double f; //(g + h)
+	public double g; //Coste para ir del nodo inicial a este
+	public double h; //coste hurístico para llegar
 	StateObservation state = null;
 	Vector2d orientation;
+	boolean inPath;
+	double score;
+	Node support;
 	
 	//Constructor en base a un estado
 	public Node(StateObservation stateObservation){
@@ -49,6 +52,9 @@ public class Node {
 		x = (int) (state.getAvatarPosition().x / fescala.x);
 		y = (int) (state.getAvatarPosition().y / fescala.y);
 		orientation = state.getAvatarOrientation();
+		inPath=false;
+		score = stateObservation.getGameScore();
+		support=null;
 	}
 	
 	//Constructor en base a un vector
@@ -95,6 +101,8 @@ public class Node {
 		h = original.h;
 		state = original.state.copy();
 		orientation = original.orientation;
+		inPath=original.inPath;
+		support=original.support;
 	}
 	
 	
@@ -150,27 +158,15 @@ public class Node {
 		}
 	}
 	
-	public int calcular_h(){
-		int h = 0;
+	public double calcular_h(){
+		h = 1000;
 		
 		if(target_exit)
-			if (state.isGameOver())
+			if (state.isGameOver()) {
+				h=0;
 				return h;
+			}
 
-		if(target_goto) {
-			double dif_x = target_x - x;
-			double dif_y = target_y - y;
-			
-			//Tengo en cuenta la distancia
-			h+=Math.abs(dif_x) + Math.abs(dif_y);			
-		
-			//Y la orientacion
-			if(dif_x != 0 && orientation.x != dif_x/Math.abs(dif_x))
-				h+=1;
-			if(dif_y != 0 && orientation.y == dif_y/Math.abs(dif_y))
-				h+=1;
-		}
-		
 		//Tengo en cuenta la existencia del objeto
 		boolean exists = false;
 		if(target_exists || target_notExists) {
@@ -183,18 +179,41 @@ public class Node {
 					}
 				}
 			}				
+			if((exists && target_notExists) || (!exists && target_exists))
+				h+=1;
+			else {
+				h=0;
+				return 0;
+			}
+		}	
+		
+		if(target_goto) {
+			double dif_x = target_x - x;
+			double dif_y = target_y - y;
+			
+			//Tengo en cuenta la distancia
+			h+=Math.abs(dif_x) + Math.abs(dif_y);			
+		
+			//Y la orientacion
+			if(dif_x != 0 && orientation.x != dif_x/Math.abs(dif_x))
+				h+=1;
+			if(dif_y != 0 && orientation.y == dif_y/Math.abs(dif_y))
+				h+=1;
+			
+			if(dif_x != 0 || dif_y != 0) {
+				h-=score*10;
+			}
+			else {
+				h=0;
+			}
+			
 		}
 			
-		if((exists && target_notExists) || (!exists && target_exists))
-			h+=1;
-		
-		this.h = h;
-		
 		return h;
 	}
 	
 	//Funcion auxiliar que recalcula f
-	public int calcular_f() {
+	public double calcular_f() {
 		f = h+g;
 		return f;
 	}
@@ -202,6 +221,8 @@ public class Node {
     //Criterio que se usa para comparar si dos nodos son iguales. 
     //Para ello, se tiene en cuenta la posición, orientacion y número de recursos en juego
     public boolean equals (Object o) {
+    	if(o==null) return false;
+    	
     	Node e = (Node) o;
     	
     	if((e.x != x) || (e.y != y)) 
@@ -242,6 +263,7 @@ public class Node {
     			"orientacion= " + orientation +
     			", accion= " + accion + 
     			", h= " + h +
+    			", inPath " + inPath +
     			"}\n";
     }
 
@@ -254,7 +276,7 @@ public class Node {
 	//Primero se tiene en cuenta el valor de f, luego el de g y por último la acción a realizar
 	static Comparator<Node> NodeComparator = new Comparator<Node>() {
 		public int compare(Node n1, Node n2) {
-			int diff = n1.f - n2.f;
+			double diff = n1.h - n2.h;
 			if( diff > 0) return 1;
 			else if (diff < 0) return -1;
 			else {

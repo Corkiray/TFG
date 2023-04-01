@@ -39,7 +39,7 @@ public class AgentAStar{
 	 * @param stateObs Observation of the current state.
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
-	public AgentAStar(StateObservation state, ElapsedCpuTimer timer) {	
+	public AgentAStar() {	
 		//Inicializo el plan a vacío
 		hayPlan = false;
 		plan = new ArrayList<ACTIONS>();

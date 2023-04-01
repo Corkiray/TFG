@@ -2,6 +2,7 @@ package controller;
 
 import java.util.ArrayList;
 
+import controller.Agents.AgentLRTAStar_k;
 import controller.Agents.AgentLRTAStar;
 import controller.Agents.AgentRTAStar;
 import controller.Agents.Node;
@@ -17,7 +18,7 @@ public class MainController extends AbstractPlayer{
 
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
-	public AgentRTAStar agent;
+	public AgentLRTAStar_k agent;
 	public Node node;
 
 	public boolean hayPDDLPlan;
@@ -26,7 +27,7 @@ public class MainController extends AbstractPlayer{
 	public MainController(StateObservation state, ElapsedCpuTimer timer) {
 		minizincInterface = new MinizincInterface(gameConfigFile);
 		pddlPlanner = new PDDLInterface(gameConfigFile);
-		agent = new AgentRTAStar(state, timer);
+		agent = new AgentLRTAStar_k(1);
 		hayPDDLPlan = false;
 		hayAgentPlan = false;
 	}
@@ -62,16 +63,16 @@ public class MainController extends AbstractPlayer{
 			action = node.accion;
 			if(node.h == 0)
 				hayAgentPlan = false;
-			System.out.print(action);
+			//System.out.print(action);
 		}
 		
-		/*
+		
 		try {
-			Thread.sleep(500);
+			Thread.sleep(0);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		*/
+		
 		
 		return action;
 	}

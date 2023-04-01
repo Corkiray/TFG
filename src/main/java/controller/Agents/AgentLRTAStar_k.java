@@ -11,15 +11,17 @@ import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
-public class AgentLRTAStar{
+public class AgentLRTAStar_k{
 	
 	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
-			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE, ACTIONS.ACTION_NIL};
+			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
 
 	boolean hayPlan;
 	ArrayList <ACTIONS> plan;
 	
 	ArrayList<Node> explorados;
+	
+	int k;
 	
 	int nExpandidos; //Número de nodos que han sido expandidos(se ha comprobado si es objetivo)
 	int maxMem; //Número máximo de nodos almacenados en memoria
@@ -31,7 +33,9 @@ public class AgentLRTAStar{
 	 * @param stateObs Observation of the current state.
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
-	public AgentLRTAStar() {			
+	public AgentLRTAStar_k(int k) {		
+		this.k = k;
+		
 		//Inicializo lista de nodos
 		explorados = new ArrayList<Node>();
 		
@@ -68,9 +72,10 @@ public class AgentLRTAStar{
 		root.g = 0;
 		root.calcular_h();
 		root.calcular_f();
+		root.inPath=true;
 
-		System.out.print("\nPosición del jugador: [" + root.x+ " " + root.y + "]\n"
-				+ "Posición del objetivo: [" + Node.target_x+ " " +Node.target_y + "]\n");
+		//System.out.print("\nPosición del jugador: [" + root.x+ " " + root.y + "]\n"
+		//		+ "Posición del objetivo: [" + Node.target_x+ " " +Node.target_y + "]\n");
 
 
 		//Llamo al algoritmo de búsqueda, que devolverá la acción a realizar
@@ -93,71 +98,122 @@ public class AgentLRTAStar{
 		return child;
 	}
 	
-	//Algoritmo RTAstar
+	//Algoritmo
 	public Node LRTAStar(Node actual, StateObservation state) {
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.NodeComparator);
+
 		nExpandidos++; //Cada vez que llamo al algoritmo, expando el nodo en el que está el avatar.
-		
+
+
 		System.out.print("NODO PADRE: " + actual);
 
-		
-		//Si un nodo no está explorado, inicializo la heurística actual por la generada matemáticamente.
-		if(!explorados.contains(actual)) {
-			actual.calcular_h();
-			explorados.add(actual);
-		}
-		
-		//Cola de sucesores, que se ordenarán por prioridad
-		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.NodeComparator);
-		
-		for (ACTIONS action : PosibleActions) {
-			Node child = new Node(actual);
-			child = child.advance(action);
-			child.padre = actual;
-			child.accion = action;
-			child.g = actual.g+1;
-
-			boolean encontrado=false;
-			//Si ya está visitado,le establezco la heurística como la que tiene el algoritmo guardada para esa posición
-			for(Node node : explorados) {
-				if(node.equals(child)) {
-					child.h = node.h;
-					child.calcular_f();
-					encontrado=true;
-					break;
-				}
-			}
-			if(!encontrado) {
-				child.calcular_h();
-				child.calcular_f();
-				explorados.add(child);
-			}
-
-			System.out.print("HIJO: " + child);
-
-			//En cualquier caso, si se ha completado la acción, se añade a la cola de sucesores
-			if(!child.equals(actual))
-				sucesores.add(child);		
-		}
-		
-		//Extraigo el hijo que tenga menor coste (según la heurística)
-		Node best = sucesores.poll();	
-		
-		actual.h = best.h + 1; //La nueva heurística es la del hijo + el coste de desplazamiento que, como es constante, será 1
-		
-		//Si la nueva heurística es mejor que la que tenía almacenado el algoritmo, se actualiza
+		boolean found = false;
 		for(Node node : explorados) {
 			if(node.equals(actual)) {
-				if(node.h < actual.h) {
-					explorados.remove(node);
-					explorados.add(actual);
-				}
+				explorados.remove(node);
+				node.inPath = true;
+				explorados.add(node);
+				found=true;
 				break;
 			}
 		}
+		if(!found)
+			explorados.add(actual);
 		
-		return best;		
+		lookaheadUpdateK(actual);
+
+		for (ACTIONS action : PosibleActions) {
+			Node child = new Node(actual);
+			child = child.advance(action);
+			child.accion = action;
+			
+			if(!child.equals(actual)) {
+				for(Node node : explorados) {
+					if(node.equals(child)) {
+						child.h = node.h;
+						sucesores.add(child);
+						System.out.print(child);
+					}
+				}			
+			}
+		}
+		
+		Node best = sucesores.poll();
+
+		return best;
 	}
 
+	
+	void lookaheadUpdateK(Node root) {
+		int cont = k-1;
+		ArrayList<Node> candidates = new ArrayList<Node>();
+		candidates.add(root);
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.NodeComparator);
+		
+		while(!candidates.isEmpty()) {
+			sucesores.clear();
+			Node actual = candidates.get(0);
+			candidates.remove(0);
+
+			//LookaheadUpdate1
+			boolean updated = false;
+			for (ACTIONS action : PosibleActions){
+				Node child = new Node(actual);
+				child = child.advance(action);
+				child.padre = actual;
+				child.accion = action;
+
+				boolean found=false;
+				for(Node node :  explorados) {
+					if(node.equals(child)) {
+						child = node;
+						
+						found=true;
+						break;
+					}
+				}
+				
+				if(!found) {
+					child.calcular_h();
+					explorados.add(child);
+				}
+				
+				if(!child.equals(actual))
+					sucesores.add(child);
+			}
+			
+			Node best = sucesores.peek();
+			
+			actual.h = best.h + 1;
+			actual.support = best;
+			
+			for(Node node : explorados) {
+				if(node.equals(actual)) {
+					if(node.h > actual.h) {
+						actual.h=node.h;
+					}
+					explorados.remove(node);
+					explorados.add(actual);
+
+					updated = true;
+					break;
+				}
+			}
+			
+			if(updated && cont > 0) {
+				if(cont<49) System.out.print("CONT " + Integer.toString(cont) +"\n");
+				for (Node child : sucesores) {		
+					if(cont > 0 && child.inPath && actual.equals(child.support)) {
+						candidates.add(child);
+						cont--;
+					}
+				}
+			}
+		}
+	}
+
+	
+	
 }
 
 
