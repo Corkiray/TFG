@@ -1,4 +1,4 @@
-package controller.Agents.AgenteAStar;
+package controller.Agents;
 
 import tools.Vector2d;
 
@@ -14,6 +14,9 @@ import ontology.Types.WINNER;
 
 //Clase nodo que usaré para las diferentes búsquedas
 public class Node {
+	//Variable global del factor de escala
+	public static Vector2d fescala;
+
 	//Variables globales para contabilizar los objetivos
 	static boolean target_goto;
 	static boolean target_exists;
@@ -28,10 +31,10 @@ public class Node {
 	int x; //Posición en el eje x dentro del mapa del juego
 	int y; //Posición en el eje y dentro del mapa del juego
 	Node padre; //Nodo padre
-	ACTIONS accion; //Acción que se realizó para llegar a e´l
-	int f; //(g + h)
-	int g; //Coste para ir del nodo inicial a este
-	int h; //coste hurístico para llegar
+	public ACTIONS accion; //Acción que se realizó para llegar a e´l
+	public int f; //(g + h)
+	public int g; //Coste para ir del nodo inicial a este
+	public int h; //coste hurístico para llegar
 	StateObservation state = null;
 	Vector2d orientation;
 	
@@ -43,8 +46,8 @@ public class Node {
 		g = 0;
 		h = 0;
 		state = stateObservation;
-		x = (int) (state.getAvatarPosition().x / AgenteAStar.fescala.x);
-		y = (int) (state.getAvatarPosition().y / AgenteAStar.fescala.y);
+		x = (int) (state.getAvatarPosition().x / fescala.x);
+		y = (int) (state.getAvatarPosition().y / fescala.y);
 		orientation = state.getAvatarOrientation();
 	}
 	
@@ -112,8 +115,8 @@ public class Node {
 					String resource = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
 					if(resource.contentEquals(target_name)) {
 						target_goto = true;
-						target_x = (int) (observation.position.x / AgenteAStar.fescala.x);
-						target_y = (int) (observation.position.y / AgenteAStar.fescala.y);
+						target_x = (int) (observation.position.x / fescala.x);
+						target_y = (int) (observation.position.y / fescala.y);
 					}
 				}
 			}	
@@ -129,8 +132,8 @@ public class Node {
 					if(name.contentEquals("closedoor")) {
 						System.out.print("ayawasca\n");
 						target_goto = true;
-						target_x = (int) (observation.position.x / AgenteAStar.fescala.x);
-						target_y = (int) (observation.position.y / AgenteAStar.fescala.y);
+						target_x = (int) (observation.position.x / fescala.x);
+						target_y = (int) (observation.position.y / fescala.y);
 					}
 				}
 			}	
@@ -207,8 +210,9 @@ public class Node {
     	if(!e.orientation.equals(orientation))
     		return false;
     	
-    	//if(!e.state.getResourcesPositions().equals(state.getResourcesPositions()))
-    	//	return false;
+    	if(e.state.getGameScore() != state.getGameScore()) {
+    		return false;
+    	}
     	
     	return true;
     }
@@ -232,7 +236,6 @@ public class Node {
     	}
     }
     
-    @Override
     public String toString() {
     	return "Nodo{" + 
     			"posicion= (" + x + ", " + y + ") " +

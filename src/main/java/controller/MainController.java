@@ -1,29 +1,24 @@
 package controller;
 
-import controller.Agents.AgenteAStar.AgenteAStar;
-import controller.Agents.AgenteAStar.Node;
-import controller.MiniZinc.MinizincInterface;
 import java.util.ArrayList;
-import java.util.PriorityQueue;
 
+import controller.Agents.AgentLRTAStar;
+import controller.Agents.AgentRTAStar;
+import controller.Agents.Node;
+import controller.MiniZinc.MinizincInterface;
 import controller.PDDL.PDDLInterface;
-
-import java.util.Comparator;
-
-import core.game.Observation;
 import core.game.StateObservation;
+import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
-import tools.Vector2d;
-
-import core.player.AbstractPlayer;
 
 public class MainController extends AbstractPlayer{
     public static String gameConfigFile;
 
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
-	public AgenteAStar agente;
+	public AgentRTAStar agent;
+	public Node node;
 
 	public boolean hayPDDLPlan;
 	public boolean hayAgentPlan;
@@ -31,7 +26,7 @@ public class MainController extends AbstractPlayer{
 	public MainController(StateObservation state, ElapsedCpuTimer timer) {
 		minizincInterface = new MinizincInterface(gameConfigFile);
 		pddlPlanner = new PDDLInterface(gameConfigFile);
-		agente = new AgenteAStar(state, timer);
+		agent = new AgentRTAStar(state, timer);
 		hayPDDLPlan = false;
 		hayAgentPlan = false;
 	}
@@ -40,7 +35,6 @@ public class MainController extends AbstractPlayer{
         MainController.gameConfigFile = path;
     }
 
-	@Override
 	public ACTIONS act(StateObservation state, ElapsedCpuTimer timer) {
 		ACTIONS action = ACTIONS.ACTION_NIL;
 		
@@ -57,25 +51,27 @@ public class MainController extends AbstractPlayer{
 			hayPDDLPlan = true;
 		}
 		else if(!hayAgentPlan){
-			ArrayList<String> agentAction = pddlPlanner.getNextAction(state);
-			System.out.print(agentAction);	
-			agente.plan(state, timer, agentAction);		
+			ArrayList<String> agentGoal = pddlPlanner.getNextAction(state);
+			System.out.print(agentGoal);	
+			agent.setObjetive(agentGoal, state);		
 			
 			hayAgentPlan = true;
 		}
 		else {
-			action = agente.act();
-			if(action==ACTIONS.ACTION_NIL)
+			Node node = agent.act(state, timer);
+			action = node.accion;
+			if(node.h == 0)
 				hayAgentPlan = false;
 			System.out.print(action);
 		}
 		
+		/*
 		try {
-			Thread.sleep(50);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
 		
 		return action;
 	}

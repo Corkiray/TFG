@@ -1,10 +1,10 @@
-package controller.Agents.AgenteAStar;
+package controller.Agents;
 
 
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
-import controller.Agents.AgenteAStar.Node;
+import controller.Agents.Node;
 
 import java.util.Comparator;
 
@@ -16,7 +16,7 @@ import tools.Vector2d;
 
 import core.vgdl.VGDLRegistry;
 
-public class AgenteAStar{
+public class AgentAStar{
 	
 	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
 			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
@@ -39,12 +39,7 @@ public class AgenteAStar{
 	 * @param stateObs Observation of the current state.
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
-	public AgenteAStar(StateObservation state, ElapsedCpuTimer timer) {
-		//Calculo el factor de escala píxeles -> grid)
-		fescala = new Vector2d(
-				state.getWorldDimension().width / state.getObservationGrid().length,
-				state.getWorldDimension().height / state.getObservationGrid()[0].length );
-		
+	public AgentAStar(StateObservation state, ElapsedCpuTimer timer) {	
 		//Inicializo el plan a vacío
 		hayPlan = false;
 		plan = new ArrayList<ACTIONS>();
@@ -59,6 +54,10 @@ public class AgenteAStar{
 	
 	public void plan(StateObservation state, ElapsedCpuTimer time, ArrayList<String> objetive){
 		//Establezco el objetivo
+		//Calculo el factor de escala píxeles -> grid)
+		fescala = new Vector2d(
+				state.getWorldDimension().width / state.getObservationGrid().length,
+				state.getWorldDimension().height / state.getObservationGrid()[0].length );
 		Node.setObjetive(objetive, state);
 		
 		//Genero el nodo inicial y le inicio las variables de heurística
@@ -132,7 +131,7 @@ public class AgenteAStar{
 			
 			actual = abiertos.poll();
 			
-			System.out.print("NODO PADRE: " + actual);
+			//System.out.print("NODO PADRE: " + actual);
 
 			nExpandidos++;
 			
@@ -148,7 +147,7 @@ public class AgenteAStar{
 				child.calcular_h();
 				child.calcular_f();
 				
-				System.out.print("HIJO: " + child);
+				//System.out.print("HIJO: " + child);
 
 				
 				boolean encontrado = false;
