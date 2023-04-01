@@ -1,4 +1,4 @@
-package controller.Agents;
+package controller.Agents.trash;
 
 import tools.Vector2d;
 import core.game.StateObservation;

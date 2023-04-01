@@ -20,15 +20,15 @@
         (requiere Recurso5 Recurso4)
         (= (peso Recurso5) 3)
         (= (posicion Recurso5) 5)
+        (enSuelo Recurso1)
+        (= (peso Recurso1) 3)
+        (= (posicion Recurso1) 1)
         (enSuelo Recurso2)
         (requiere Recurso2 Recurso1)
         (= (peso Recurso2) 3)
         (= (posicion Recurso2) 2)
         (= (maxPeso) 12)
         (= (actualPeso) 0)
-        (enSuelo Recurso1)
-        (= (peso Recurso1) 3)
-        (= (posicion Recurso1) 1)
     )
     (:goal
         (AND
