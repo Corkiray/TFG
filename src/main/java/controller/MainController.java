@@ -2,10 +2,11 @@ package controller;
 
 import java.util.ArrayList;
 
+import controller.Agents.LPAStar.*;
 import controller.Agents.AgentLRTAStar_k;
 import controller.Agents.AgentLRTAStar;
 import controller.Agents.AgentRTAStar;
-import controller.Agents.Node;
+import controller.Agents.AgentAStar;
 import controller.MiniZinc.MinizincInterface;
 import controller.PDDL.PDDLInterface;
 import core.game.StateObservation;
@@ -18,7 +19,7 @@ public class MainController extends AbstractPlayer{
 
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
-	public AgentLRTAStar_k agent;
+	public AgentLPAStar agent;
 	public Node node;
 
 	public boolean hayPDDLPlan;
@@ -27,7 +28,7 @@ public class MainController extends AbstractPlayer{
 	public MainController(StateObservation state, ElapsedCpuTimer timer) {
 		minizincInterface = new MinizincInterface(gameConfigFile);
 		pddlPlanner = new PDDLInterface(gameConfigFile);
-		agent = new AgentLRTAStar_k(1);
+		agent = new AgentLPAStar();
 		hayPDDLPlan = false;
 		hayAgentPlan = false;
 	}
@@ -54,14 +55,14 @@ public class MainController extends AbstractPlayer{
 		else if(!hayAgentPlan){
 			ArrayList<String> agentGoal = pddlPlanner.getNextAction(state);
 			System.out.print(agentGoal);	
-			agent.setObjetive(agentGoal, state);		
+			agent.initialize(state, agentGoal);
+			agent.plan(state, timer);		
 			
 			hayAgentPlan = true;
 		}
 		else {
-			Node node = agent.act(state, timer);
-			action = node.accion;
-			if(node.h == 0)
+			action = agent.act();
+			if(action == ACTIONS.ACTION_NIL)
 				hayAgentPlan = false;
 			//System.out.print(action);
 		}
@@ -72,7 +73,6 @@ public class MainController extends AbstractPlayer{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
 		
 		return action;
 	}

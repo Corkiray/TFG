@@ -11,8 +11,8 @@ ww.ww........w.......w
 ww..6..3..w..w..w....w
 ww.ww.....4.....5....w
 ww.wwwwwww...w.......w
-ww.ww....w.......wwwww
+ww.ww....w......1wwwww
 ww.ww....www.........w
-ww1.....2.wA.........w
+ww......2.wA.........w
 wwwwww...wwwwwwwwwwwww
 wwwwwwwwwwwwwwwwwwwwww
