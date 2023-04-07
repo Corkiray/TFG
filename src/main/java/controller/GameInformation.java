@@ -45,6 +45,7 @@ public class GameInformation {
 	public Map<String, Object> minizincCorrespondence;
 	public Map<String, String> minizinc_to_PDDL_correspondence;
     public Map<String, String> pddl_to_agent_correspondence;
+    public Map<String, Integer> values_correspondence;
 	
     public GameInformation() {
     }

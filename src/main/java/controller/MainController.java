@@ -1,35 +1,60 @@
 package controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
-import controller.Agents.AgentLRTAStar_k;
-import controller.Agents.AgentLRTAStar;
-import controller.Agents.AgentRTAStar;
-import controller.Agents.Node;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+
+import controller.Agents.*;
+
 import controller.MiniZinc.MinizincInterface;
 import controller.PDDL.PDDLInterface;
 import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
+import tools.Vector2d;
 
 public class MainController extends AbstractPlayer{
     public static String gameConfigFile;
 
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
-	public AgentLRTAStar_k agent;
-	public Node node;
+	public AgentDStar agent;
+	public Node actualNode;
 
+	ArrayList<String> agentGoal;
+	
 	public boolean hayPDDLPlan;
-	public boolean hayAgentPlan;
+	public boolean hayAgentObjetive;
+	public boolean agentNeedsReplan;
+
+	private GameInformation gameInformation;
 
 	public MainController(StateObservation state, ElapsedCpuTimer timer) {
-		minizincInterface = new MinizincInterface(gameConfigFile);
-		pddlPlanner = new PDDLInterface(gameConfigFile);
-		agent = new AgentLRTAStar_k(1);
+		// Load game information
+		Yaml yaml = new Yaml(new Constructor(GameInformation.class));
+		
+		try {
+			InputStream inputStream = new FileInputStream(new File(gameConfigFile));
+			this.gameInformation = yaml.load(inputStream);
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getStackTrace());
+		}
+		
+		minizincInterface = new MinizincInterface(gameInformation);
+		pddlPlanner = new PDDLInterface(gameInformation);
+		Node.initialize(gameInformation, state);
+		agent = new AgentDStar();
+
 		hayPDDLPlan = false;
-		hayAgentPlan = false;
+		hayAgentObjetive = false;
+		agentNeedsReplan = false;
+		
 	}
 	
     public static void setGameConfigFile(String path) {
@@ -51,19 +76,35 @@ public class MainController extends AbstractPlayer{
 			
 			hayPDDLPlan = true;
 		}
-		else if(!hayAgentPlan){
-			ArrayList<String> agentGoal = pddlPlanner.getNextAction(state);
-			System.out.print(agentGoal);	
-			agent.setObjetive(agentGoal, state);		
+		else if(!hayAgentObjetive){
+			agentGoal = pddlPlanner.getNextAction(state);
+			System.out.print(agentGoal);
+
+			Node.setObjetive(agentGoal, state);
+			agent.initialize(state);
+			agent.plan(state, timer);
 			
-			hayAgentPlan = true;
+			//agent.clear();
+			hayAgentObjetive = true;
+		}
+		else if(agentNeedsReplan) {
+			agent.plan(state, timer);
+			agentNeedsReplan=false;
 		}
 		else {
-			Node node = agent.act(state, timer);
-			action = node.accion;
-			if(node.h == 0)
-				hayAgentPlan = false;
-			//System.out.print(action);
+			agent.updateCosts(state, timer);
+			actualNode = agent.act(state);
+			if(actualNode == null) {
+				agentNeedsReplan=true;
+				action = ACTIONS.ACTION_NIL;
+			}
+			else {
+				if(actualNode.h == 0)
+					hayAgentObjetive = false;
+				action = actualNode.accion;
+			}
+			
+			System.out.print(action);
 		}
 		
 		
@@ -72,7 +113,6 @@ public class MainController extends AbstractPlayer{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
 		
 		return action;
 	}

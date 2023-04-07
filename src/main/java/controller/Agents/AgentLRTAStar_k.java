@@ -50,13 +50,7 @@ public class AgentLRTAStar_k{
 		
 	}
 	
-	public void setObjetive(ArrayList<String> objetive, StateObservation state) {
-		//Calculo el factor de escala píxeles -> grid)
-		Node.fescala = new Vector2d(
-				state.getWorldDimension().width / state.getObservationGrid().length,
-				state.getWorldDimension().height / state.getObservationGrid()[0].length );
-
-		Node.setObjetive(objetive, state);
+	public void clear() {
 		explorados.clear();
 	}
 	
@@ -69,9 +63,6 @@ public class AgentLRTAStar_k{
 	public Node act(StateObservation state, ElapsedCpuTimer timer) {
 		//Genero el nodo inicial y le inicio las variables de heurística
 		Node root = new Node(state);
-		root.g = 0;
-		root.calcular_h();
-		root.calcular_f();
 		root.inPath=true;
 
 		//System.out.print("\nPosición del jugador: [" + root.x+ " " + root.y + "]\n"
@@ -80,7 +71,7 @@ public class AgentLRTAStar_k{
 
 		//Llamo al algoritmo de búsqueda, que devolverá la acción a realizar
 		long tInicio = System.nanoTime();
-		Node child = LRTAStar(root, state);
+		Node child = LRTAStar(root);
 		//Como se llama múltiples veces al algoritmo, y el Runtime es acumulado, voy sumándolos
 		runTime += (System.nanoTime()-tInicio); 
 		
@@ -99,43 +90,31 @@ public class AgentLRTAStar_k{
 	}
 	
 	//Algoritmo
-	public Node LRTAStar(Node actual, StateObservation state) {
-		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.NodeComparator);
+	public Node LRTAStar(Node actual) {
+		actual.inPath = true;
 
 		nExpandidos++; //Cada vez que llamo al algoritmo, expando el nodo en el que está el avatar.
 
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.H_NodeComparator);
 
+		Node node = actual.getFrom(explorados);
+		if(node!=null) {
+			actual.h = node.h;
+			explorados.remove(node);
+		}
+		else {
+			actual.calcular_h();
+		}
+		explorados.add(actual);
+		
 		System.out.print("NODO PADRE: " + actual);
 
-		boolean found = false;
-		for(Node node : explorados) {
-			if(node.equals(actual)) {
-				explorados.remove(node);
-				node.inPath = true;
-				explorados.add(node);
-				found=true;
-				break;
-			}
-		}
-		if(!found)
-			explorados.add(actual);
-		
-		lookaheadUpdateK(actual);
+		ArrayList<Node> succ = lookaheadUpdateK(actual);
 
-		for (ACTIONS action : PosibleActions) {
-			Node child = new Node(actual);
-			child = child.advance(action);
-			child.accion = action;
-			
-			if(!child.equals(actual)) {
-				for(Node node : explorados) {
-					if(node.equals(child)) {
-						child.h = node.h;
-						sucesores.add(child);
-						System.out.print(child);
-					}
-				}			
-			}
+		for (Node child : succ) {	
+			child.h = child.getFrom(explorados).h;
+			System.out.print(child);				
+			sucesores.add(child);
 		}
 		
 		Node best = sucesores.poll();
@@ -144,72 +123,64 @@ public class AgentLRTAStar_k{
 	}
 
 	
-	void lookaheadUpdateK(Node root) {
+	ArrayList<Node> lookaheadUpdateK(Node root) {
+		boolean inRoot = true;
+		ArrayList<Node> ret = null;
+		
 		int cont = k-1;
 		ArrayList<Node> candidates = new ArrayList<Node>();
 		candidates.add(root);
-		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.NodeComparator);
+		
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.H_NodeComparator);
 		
 		while(!candidates.isEmpty()) {
 			sucesores.clear();
-			Node actual = candidates.get(0);
-			candidates.remove(0);
+			Node actual = candidates.remove(0);
 
+			boolean updated=false;
 			//LookaheadUpdate1
-			boolean updated = false;
-			for (ACTIONS action : PosibleActions){
-				Node child = new Node(actual);
-				child = child.advance(action);
-				child.padre = actual;
-				child.accion = action;
-
-				boolean found=false;
-				for(Node node :  explorados) {
-					if(node.equals(child)) {
-						child = node;
-						
-						found=true;
-						break;
-					}
+			for (Node child : actual.generate_succ()) {
+				Node node = child.getFrom(explorados);
+				if(node!=null) {
+					child.h = node.h;
+					child.inPath = node.inPath;
+					child.support = node.support;
 				}
-				
-				if(!found) {
+				else {
 					child.calcular_h();
-					explorados.add(child);
+					explorados.add(child);					
 				}
-				
-				if(!child.equals(actual))
-					sucesores.add(child);
+				sucesores.add(child);
+			}
+			
+			if(inRoot) {
+				ret = new ArrayList<Node>(sucesores);
+				inRoot=false;
 			}
 			
 			Node best = sucesores.peek();
-			
-			actual.h = best.h + 1;
 			actual.support = best;
 			
-			for(Node node : explorados) {
-				if(node.equals(actual)) {
-					if(node.h > actual.h) {
-						actual.h=node.h;
-					}
-					explorados.remove(node);
-					explorados.add(actual);
-
-					updated = true;
-					break;
-				}
+			if(actual.h < best.h+1) {
+				actual.h = best.h+1;
+				updated=true;
 			}
+			explorados.remove(actual);
+			explorados.add(actual);				
+			//end LookaheadUpdate1
 			
-			if(updated && cont > 0) {
-				if(cont<49) System.out.print("CONT " + Integer.toString(cont) +"\n");
+			if(updated) {
 				for (Node child : sucesores) {		
 					if(cont > 0 && child.inPath && actual.equals(child.support)) {
+						System.out.print("CONT " + Integer.toString(cont) +"\n");
 						candidates.add(child);
 						cont--;
 					}
 				}
 			}
 		}
+		
+		return ret;
 	}
 
 	
