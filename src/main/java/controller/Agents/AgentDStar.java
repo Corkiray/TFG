@@ -1,10 +1,10 @@
-package controller.Agents.LPAStar;
+package controller.Agents;
 
 
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
-import controller.Agents.LPAStar.Node;
+import controller.Agents.Node;
 
 import java.util.Comparator;
 
@@ -16,7 +16,7 @@ import tools.Vector2d;
 
 import core.vgdl.VGDLRegistry;
 
-public class AgentLPAStar{
+public class AgentDStar{
 	
 	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
 			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
@@ -24,7 +24,7 @@ public class AgentLPAStar{
 	public static Vector2d fescala;
 	
 	boolean hayPlan;
-	ArrayList <ACTIONS> plan;
+	ArrayList <Node> plan;
 	
 	int nExpandidos; //Número de nodos que han sido expandidos(se ha comprobado si es objetivo)
 	int maxMem; //Número máximo de nodos almacenados en memoria
@@ -36,6 +36,7 @@ public class AgentLPAStar{
 	ArrayList<Node> explorados;
 
 	Node inicial;
+	Node goal;
 
 	
 	/**
@@ -43,10 +44,10 @@ public class AgentLPAStar{
 	 * @param stateObs Observation of the current state.
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
-	public AgentLPAStar() {	
+	public AgentDStar() {	
 		//Inicializo el plan a vacío
 		hayPlan = false;
-		plan = new ArrayList<ACTIONS>();
+		plan = new ArrayList<Node>();
 		
 		//Inicializo los resultados a 0
 		nExpandidos = 0;
@@ -61,24 +62,29 @@ public class AgentLPAStar{
 	
 	public void plan(StateObservation state, ElapsedCpuTimer time){
 		//Genero el nodo inicial y le inicio las variables de heurística
-		Node root = new Node(state);
+		inicial = new Node(state);
+		inicial.rhs= Double.POSITIVE_INFINITY;
+		inicial.g = Double.POSITIVE_INFINITY;
+		inicial.h=0;
 		
-		System.out.print("\nPosición del jugador: [" + root.x+ " " + root.y + "]\n"
+		System.out.print("\nPosición del jugador: [" + inicial.x+ " " + inicial.y + "]\n"
 				+ "Posición del objetivo: [" + Node.target_x+ " " +Node.target_y + "]\n");
 
 		//Llamo al algoritmo de búsqueda, que devolverá el último nodo del camino encontrado
 		long tInicio = System.nanoTime();
 		System.out.print("Entramos en astar\n");
-		Node ultimo = LPAStar(state);
+		ComputeShortestPath();
 		System.out.print("salimos de astar\n");
 		runTime = (System.nanoTime()-tInicio)/1000000.0;
 		hayPlan = true;
 
 		//Recorro los padres desde el nodo dado hasta el nodo inicial, y voy guardándolos al principio del plan
-		while(!ultimo.equals(root)) {
+		plan.clear();
+		Node ultimo = inicial;
+		while(!ultimo.equals(goal)) {
 			System.out.print(ultimo);
-			plan.add(0, ultimo.accion);
-			ultimo = ultimo.padre;			
+			plan.add(0, ultimo);
+			ultimo = ultimo.hijo;			
 		}
 		tamRuta = plan.size();
 
@@ -98,38 +104,38 @@ public class AgentLPAStar{
      * @param elapsedTimer Timer when the action returned is due.
 	 * @return la próxima acción a realizar
 	 */
-	public ACTIONS act() {
-		//Acción que devolverá el algoritmo
-		ACTIONS accion = ACTIONS.ACTION_NIL;
-		
+	public Node act(StateObservation state) {
+		Node next;
 		if(!plan.isEmpty()) {
-			accion = plan.get(0);
-			plan.remove(0);			
+			next = plan.get(0);
+			if(next.is_able(state)) {
+				plan.remove(0);							
+				return next;
+			}
 		}
-	
-		return accion;
+
+		return null;
 	}
 	
-	public void initialize(StateObservation state, ArrayList<String> objetive) {
-		//Calculo el factor de escala píxeles -> grid)
-		Node.fescala = new Vector2d(
-				state.getWorldDimension().width / state.getObservationGrid().length,
-				state.getWorldDimension().height / state.getObservationGrid()[0].length );
-
-		//Establezco el objetivo
-		Node.setObjetive(objetive, state);
-		
+	public void initialize(StateObservation state) {	
 		abiertos.clear();
 		explorados.clear();
 		
 		inicial = new Node(state);
-		inicial.rhs=0;
+		inicial.rhs= Double.POSITIVE_INFINITY;
 		inicial.g = Double.POSITIVE_INFINITY;
-		inicial.calcular_h();
+		inicial.h=0;
 		
-		abiertos.add(inicial);
-		explorados.add(inicial);
 		maxMem++;
+		
+		goal = Node.GoalNode(state);
+		goal.h = goal.get_relative_h_from(inicial);
+		goal.g = Double.POSITIVE_INFINITY;
+		goal.rhs = 0;
+		
+		abiertos.add(goal);
+		explorados.add(goal);
+
 	}
 	
 	public void UpdateVertex(Node node) {	
@@ -138,7 +144,7 @@ public class AgentLPAStar{
 	}
 	
 	//Algoritmo AStar
-	public Node LPAStar(StateObservation state) {
+	public void ComputeShortestPath() {
 		//Cola donde se guardarán, por orden de prioridad, los nodos a explorar
 		Node actual; //Nodo que se está explorando
 		double g_old = -1000;
@@ -146,11 +152,22 @@ public class AgentLPAStar{
 		while (true){
 			boolean recalculate = false;
 			
+			//System.out.print(abiertos.toString());
+
 			actual = abiertos.poll();
 
 			nExpandidos++;
-			
-			if(actual.h==0) return actual;
+
+			System.out.print("NODO PADRE: " + actual);
+	
+			if(inicial.rhs != Double.POSITIVE_INFINITY) {
+				if((Node.LPA_NodeComparator.compare(actual, inicial) >= 0)
+						&&	(inicial.rhs == inicial.g)) {
+					break;
+				}
+			}
+			else if(actual.equals(inicial)) inicial=actual;
+
 			
 			if(actual.g > actual.rhs) {
 				actual.g = actual.rhs;
@@ -159,50 +176,72 @@ public class AgentLPAStar{
 				recalculate=true;
 				g_old = actual.g;
 				actual.g = Double.POSITIVE_INFINITY;
-				if(!actual.equals(inicial))
-					actual.rhs = actual.update_father().g+1;
+				if((!actual.equals(goal))
+				&& (actual.rhs == g_old+1))
+					actual.rhs = actual.update_bestChild().g+1;
 				UpdateVertex(actual);
 			}
 						
-			System.out.print("NODO PADRE: " + actual);
 
 			//Exploro las acciones:
-			for (ACTIONS action : PosibleActions) {
-				Node child = new Node(actual);
-				child = child.advance(action);
+			for (Node father : actual.generate_pred()) {
 				
-				if(child.equals(actual)) continue;
-				
-				Node node = child.getFrom(explorados);
+				Node node = father.getFrom(explorados);
 				if(node!=null) {
-					child=node;
+					father=node;
 				}
 				else {
-					child.g = Double.POSITIVE_INFINITY;
-					child.calcular_h();
-					child.accion = action;
-					child.padre = actual;
+					father.g = Double.POSITIVE_INFINITY;
+					father.h = father.get_relative_h_from(inicial);
 					maxMem++;					
 				}
-				child.pred.put(actual, action);
-				
+
+				father.childs.put(actual, father.accion);
+
 				if(recalculate) {
-					if((!child.equals(inicial)) 
-					&& (child.rhs == g_old+1)) {
-						child.rhs = child.update_father().g + 1;
+					if((!father.equals(goal)) 
+					&& (father.rhs == g_old+1)) {
+						father.hijo = father.update_bestChild();
+						if(father.hijo == null) {
+							father.rhs = Double.POSITIVE_INFINITY;
+						}
+						else {
+							father.rhs = father.update_bestChild().g + 1;							
+						}
 					}	
 				}
-				else if(!child.equals(inicial)) {
-					child.rhs = Math.min(child.rhs, actual.g+1);					
+				else if(!father.equals(goal)) {
+					if(actual.g+1 < father.rhs) {
+						father.rhs = actual.g+1;
+						father.hijo = actual;
+					}
 				}
 				
-				UpdateVertex(child);
+				UpdateVertex(father);
 				
 				explorados.remove(node);					
-				explorados.add(child);
+				explorados.add(father);
 				
-				System.out.print("HIJO: " + child);
+				System.out.print("HIJO: " + father);
 			}
 		}
+		
 	}
+	
+	public void updateCosts(StateObservation state, ElapsedCpuTimer timer) {
+		Node.lastState=state;
+		boolean isAnyChange = false;
+		for(Node node : explorados) {
+			if(node.exists_in(state, "wall", node.x, node.y)) {
+				isAnyChange=true;
+				node.rhs=Double.POSITIVE_INFINITY;
+				UpdateVertex(node);
+			}
+		}
+		
+		if(isAnyChange) {
+			plan(state, timer);
+		}
+	}
+
 }

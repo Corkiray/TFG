@@ -1,9 +1,8 @@
-package controller.Agents.LPAStar;
+package controller.Agents.DStarLite;
 
 import tools.Vector2d;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,14 +17,6 @@ import ontology.Types.WINNER;
 
 //Clase nodo que usaré para las diferentes búsquedas
 public class Node {
-	public final ArrayList<Vector2d> orientations = (ArrayList<Vector2d>) Collections.unmodifiableList(
-		    new ArrayList<Vector2d>() {{
-		        add(new Vector2d(-1, 0));
-		        add(new Vector2d(1, 0));
-		        add(new Vector2d(0, -1));
-		        add(new Vector2d(0, 1));
-		    }});
-		
 	//Variable global del factor de escala
 	public static Vector2d fescala;
 
@@ -40,8 +31,8 @@ public class Node {
 	static int target_y;
 	
 	//Variables locales, que definen cada nodo.
-	public double x; //Posición en el eje x dentro del mapa del juego
-	public double y; //Posición en el eje y dentro del mapa del juego
+	public int x; //Posición en el eje x dentro del mapa del juego
+	int y; //Posición en el eje y dentro del mapa del juego
 	Node padre; //Nodo padre
 	public ACTIONS accion; //Acción que se realizó para llegar a e´l
 	public double f; //(g + h)
@@ -53,7 +44,6 @@ public class Node {
 	boolean inPath;
 	double score;
 	Node support;
-	int drops;
 	
 	Map<Node, ACTIONS> pred;
 
@@ -74,7 +64,6 @@ public class Node {
 		score = stateObservation.getGameScore();
 		support=null;
 		pred = new HashMap<>();
-		drops=0;
 	}
 	
 	//Constructor en base a un vector
@@ -108,7 +97,6 @@ public class Node {
 		h = 0;
 		state = null;
 		orientation = null;
-		drops=0;
 	}
 	
 	//Constructor de copia
@@ -376,83 +364,6 @@ public class Node {
 		padre = bestNode;
 		accion = pred.get(bestNode);
 		return padre;
-	}
-	
-	ArrayList<Node> generate_pred(){
-		ArrayList<Node> pred = new ArrayList<Node>();
-		ACTIONS action = get_action(orientation);
-		Node aux;
-		
-		for(Vector2d ori : orientations) {
-			aux = new Node(this);
-			if(orientation == ori) {
-				aux.x = x - ori.x;
-				aux.y = y - ori.y;
-			}
-			else {
-				aux.x = x;
-				aux.y = y;
-			}
-			aux.padre = this;
-			aux.accion = action;
-			aux.orientation = ori;
-			g = g - 1;
-			
-			pred.add(aux);
-			
-		}	
-		aux = new Node(this);
-		aux.accion=ACTIONS.ACTION_USE;
-		aux.padre=this;
-		aux.drops -= 1;
-		aux.g-=1;
-		
-		return pred;
-	}
-	
-	ArrayList<Node> generate_succ(StateObservation state){
-		ArrayList<Node> succ = new ArrayList<Node>();
-		Node aux;
-		
-		for(Vector2d ori : orientations) {
-			aux = new Node(this);
-			if(orientation == ori) {
-				aux.x = x + ori.x;
-				aux.y = y + ori.y;
-			}
-			else {
-				aux.x = x;
-				aux.y = y;
-			}
-			aux.padre = this;
-			aux.orientation=ori;
-			aux.accion = get_action(ori);
-			aux.g = g + 1;
-			
-			succ.add(aux);
-		}	
-		aux = new Node(this);
-		aux.accion=ACTIONS.ACTION_USE;
-		aux.padre=this;
-		aux.drops += 1;
-		aux.g+=1;
-		
-		succ.add(aux);
-
-		return succ;
-	}
-
-	ACTIONS get_action(Vector2d orientation) {
-		if(orientation.y == 1)
-			return ACTIONS.ACTION_DOWN;
-		if(orientation.y == -1)
-			return ACTIONS.ACTION_UP;
-		if(orientation.x == 1)
-			return ACTIONS.ACTION_RIGHT;
-		if(orientation.x == 1)
-			return ACTIONS.ACTION_LEFT;
-		
-		return ACTIONS.ACTION_NIL;
 	}
 
 }

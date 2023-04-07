@@ -3,24 +3,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-import controller.Agents.LPAStar.Node;
+import controller.Agents.Node;
 
 public class arraylistTest {
 	public static void main(String[] args) {
-		Map<Node, Integer> lista = new HashMap();
+		Map<Integer, Integer> lista = new HashMap<>();
 		
-		Node node = new Node();
-		node.g = 10;
+		int a = 0;
 		
-		Node node2 = new Node();
-		node2.g =5;
+		int b = 1;
 		
-		lista.put(node, 1);
-		lista.put(node2, 2);
+		lista.put(a, 0);
+		lista.put(b, 0);
 		
-		node.g = 1;
+		Map<Integer, Integer> lista2 = new HashMap<Integer, Integer>(lista);
+		lista2.remove(a);
 		
-		System.out.print(lista.toString());	
+		ArrayList<Integer> lista3 = new ArrayList<Integer>();
+				
+		for(int i : lista3) {
+			System.out.print(i);				
+		}
+		System.out.print(a);				
+
+		
 	}
 }
 

@@ -46,13 +46,7 @@ public class AgentLRTAStar{
 		
 	}
 	
-	public void setObjetive(ArrayList<String> objetive, StateObservation state) {
-		//Calculo el factor de escala píxeles -> grid)
-		Node.fescala = new Vector2d(
-				state.getWorldDimension().width / state.getObservationGrid().length,
-				state.getWorldDimension().height / state.getObservationGrid()[0].length );
-
-		Node.setObjetive(objetive, state);
+	public void clear() {
 		explorados.clear();
 	}
 	
@@ -65,9 +59,6 @@ public class AgentLRTAStar{
 	public Node act(StateObservation state, ElapsedCpuTimer timer) {
 		//Genero el nodo inicial y le inicio las variables de heurística
 		Node root = new Node(state);
-		root.g = 0;
-		root.calcular_h();
-		root.calcular_f();
 
 		System.out.print("\nPosición del jugador: [" + root.x+ " " + root.y + "]\n"
 				+ "Posición del objetivo: [" + Node.target_x+ " " +Node.target_y + "]\n");
@@ -75,7 +66,7 @@ public class AgentLRTAStar{
 
 		//Llamo al algoritmo de búsqueda, que devolverá la acción a realizar
 		long tInicio = System.nanoTime();
-		Node child = LRTAStar(root, state);
+		Node child = LRTAStar(root);
 		//Como se llama múltiples veces al algoritmo, y el Runtime es acumulado, voy sumándolos
 		runTime += (System.nanoTime()-tInicio); 
 		
@@ -94,70 +85,56 @@ public class AgentLRTAStar{
 	}
 	
 	//Algoritmo RTAstar
-	public Node LRTAStar(Node actual, StateObservation state) {
+	public Node LRTAStar(Node actual) {
 		nExpandidos++; //Cada vez que llamo al algoritmo, expando el nodo en el que está el avatar.
 		
-		System.out.print("NODO PADRE: " + actual);
 
 		
 		//Si un nodo no está explorado, inicializo la heurística actual por la generada matemáticamente.
-		if(!explorados.contains(actual)) {
+		Node aux = actual.getFrom(explorados);
+		if(aux!=null) {
+			actual.h = aux.h;
+		}
+		else {
 			actual.calcular_h();
 			explorados.add(actual);
 		}
 		
-		//Cola de sucesores, que se ordenarán por prioridad
-		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.NodeComparator);
-		
-		for (ACTIONS action : PosibleActions) {
-			Node child = new Node(actual);
-			child = child.advance(action);
-			child.padre = actual;
-			child.accion = action;
-			child.g = actual.g+1;
+		System.out.print("NODO PADRE: " + actual);
 
-			boolean encontrado=false;
+		//Cola de sucesores, que se ordenarán por prioridad
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.H_NodeComparator);
+		
+		for (Node child : actual.generate_succ()) {
+
 			//Si ya está visitado,le establezco la heurística como la que tiene el algoritmo guardada para esa posición
-			for(Node node : explorados) {
-				if(node.equals(child)) {
-					child.h = node.h;
-					child.calcular_f();
-					encontrado=true;
-					break;
-				}
+			aux = child.getFrom(explorados);
+			if(aux!=null) {
+				child.h = aux.h;
 			}
-			if(!encontrado) {
+			else {
 				child.calcular_h();
-				child.calcular_f();
 				explorados.add(child);
 			}
 
 			System.out.print("HIJO: " + child);
 
 			//En cualquier caso, si se ha completado la acción, se añade a la cola de sucesores
-			if(!child.equals(actual))
-				sucesores.add(child);		
+			sucesores.add(child);		
 		}
 		
 		//Extraigo el hijo que tenga menor coste (según la heurística)
 		Node best = sucesores.poll();	
-		
-		actual.h = best.h + 1; //La nueva heurística es la del hijo + el coste de desplazamiento que, como es constante, será 1
-		
+
 		//Si la nueva heurística es mejor que la que tenía almacenado el algoritmo, se actualiza
-		for(Node node : explorados) {
-			if(node.equals(actual)) {
-				if(node.h < actual.h) {
-					explorados.remove(node);
-					explorados.add(actual);
-				}
-				break;
-			}
+		if(actual.h < best.h + 1) {
+			explorados.remove(actual);
+			actual.h = best.h + 1;
+			explorados.add(actual);
 		}
-		
+			
 		return best;		
 	}
-
+	
 }
-
 

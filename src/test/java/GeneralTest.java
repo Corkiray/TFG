@@ -63,7 +63,6 @@ public class GeneralTest {
 			ArcadeMachine.playOneGame(game, level, null, seed);
 		} else {
 			MainController.setGameConfigFile(test.configurationFile);
-			PDDLInterface.setGameConfigFile(test.configurationFile);
 			PDDLInterface.setDebugMode(test.debugMode);
 			PDDLInterface.setSaveInformation(test.saveOutput);
 			ArcadeMachine.runOneGame(game, level, visuals, controller, null, seed, 0);
