@@ -11,7 +11,7 @@ import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
-public class AgentLRTAStar_k{
+public class AgentLRTAStarK{
 	
 	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
 			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
@@ -33,7 +33,7 @@ public class AgentLRTAStar_k{
 	 * @param stateObs Observation of the current state.
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
-	public AgentLRTAStar_k(int k) {		
+	public AgentLRTAStarK(int k) {		
 		this.k = k;
 		
 		//Inicializo lista de nodos

@@ -169,7 +169,7 @@ public class AgentLPAStar{
 				g_old = actual.g;
 				actual.g = Double.POSITIVE_INFINITY;
 				if((!actual.equals(inicial))
-				&& (actual.rhs == g_old+1))
+				&& (actual.rhs == g_old))
 					actual.rhs = actual.update_father().g+1;
 				UpdateVertex(actual);
 			}

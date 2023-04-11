@@ -7,6 +7,7 @@ import java.util.PriorityQueue;
 import controller.Agents.Node;
 
 import java.util.Comparator;
+import java.util.ListIterator;
 
 import core.game.Observation;
 import core.game.StateObservation;
@@ -16,7 +17,7 @@ import tools.Vector2d;
 
 import core.vgdl.VGDLRegistry;
 
-public class AgentDStar{
+public class AgentDStarLite{
 	
 	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
 			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
@@ -37,6 +38,8 @@ public class AgentDStar{
 
 	Node inicial;
 	Node goal;
+	
+	int km;
 
 	
 	/**
@@ -44,7 +47,7 @@ public class AgentDStar{
 	 * @param stateObs Observation of the current state.
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
-	public AgentDStar() {	
+	public AgentDStarLite() {	
 		//Inicializo el plan a vacío
 		hayPlan = false;
 		plan = new ArrayList<Node>();
@@ -54,18 +57,13 @@ public class AgentDStar{
 		maxMem = 0;
 		tamRuta = 0;
 		
-		abiertos  = new PriorityQueue<Node>(Node.LPA_NodeComparator);
+		abiertos  = new PriorityQueue<Node>(Node.D_NodeComparator);
 
 		explorados = new ArrayList<Node>();
 	}
 		
 	
 	public void plan(StateObservation state, ElapsedCpuTimer time){
-		//Genero el nodo inicial y le inicio las variables de heurística
-		inicial = new Node(state);
-		inicial.rhs= Double.POSITIVE_INFINITY;
-		inicial.g = Double.POSITIVE_INFINITY;
-		inicial.h=0;
 		
 		System.out.print("\nPosición del jugador: [" + inicial.x+ " " + inicial.y + "]\n"
 				+ "Posición del objetivo: [" + Node.target_x+ " " +Node.target_y + "]\n");
@@ -83,7 +81,7 @@ public class AgentDStar{
 		Node ultimo = inicial;
 		while(!ultimo.equals(goal)) {
 			System.out.print(ultimo);
-			plan.add(0, ultimo);
+			plan.add(ultimo);
 			ultimo = ultimo.hijo;			
 		}
 		tamRuta = plan.size();
@@ -107,13 +105,16 @@ public class AgentDStar{
 	public Node act(StateObservation state) {
 		Node next;
 		if(!plan.isEmpty()) {
-			next = plan.get(0);
+			next = plan.remove(0);
 			if(next.is_able(state)) {
-				plan.remove(0);							
 				return next;
 			}
 		}
-
+		else {
+			Node aux = new Node(state);
+			if(is_goal(aux))
+				return aux;
+		}
 		return null;
 	}
 	
@@ -126,8 +127,6 @@ public class AgentDStar{
 		inicial.g = Double.POSITIVE_INFINITY;
 		inicial.h=0;
 		
-		maxMem++;
-		
 		goal = Node.GoalNode(state);
 		goal.h = goal.get_relative_h_from(inicial);
 		goal.g = Double.POSITIVE_INFINITY;
@@ -136,11 +135,17 @@ public class AgentDStar{
 		abiertos.add(goal);
 		explorados.add(goal);
 
+		maxMem++;
+		
+		km=0;
+
 	}
 	
 	public void UpdateVertex(Node node) {	
-		abiertos.remove(node);
+		if(abiertos.contains(node)) abiertos.remove(node);
+		node.update_key(km, inicial);
 		if(node.g != node.rhs) abiertos.add(node);
+		System.out.print(abiertos);
 	}
 	
 	//Algoritmo AStar
@@ -152,24 +157,37 @@ public class AgentDStar{
 		while (true){
 			boolean recalculate = false;
 			
-			//System.out.print(abiertos.toString());
+			System.out.print(abiertos.toString());
 
 			actual = abiertos.poll();
-
+			
 			nExpandidos++;
 
 			System.out.print("NODO PADRE: " + actual);
-	
-			if(inicial.rhs != Double.POSITIVE_INFINITY) {
-				if((Node.LPA_NodeComparator.compare(actual, inicial) >= 0)
-						&&	(inicial.rhs == inicial.g)) {
-					break;
-				}
-			}
-			else if(actual.equals(inicial)) inicial=actual;
 
+			System.out.print(inicial);
 			
-			if(actual.g > actual.rhs) {
+			if(actual.equals(inicial)) 
+				inicial=actual;
+			inicial.update_key(km, inicial);
+			if((Node.D_NodeComparator.compare(actual, inicial) >= 0)
+					&&	(inicial.rhs <= inicial.g)) {
+				break;
+			}
+
+			try {
+				Thread.sleep(0);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			
+			if(actual.last_km < km) {
+				actual.update_key(km, inicial);
+				abiertos.add(actual);
+				continue;
+			}
+			else if(actual.g > actual.rhs) {
 				actual.g = actual.rhs;
 			}
 			else {
@@ -177,7 +195,7 @@ public class AgentDStar{
 				g_old = actual.g;
 				actual.g = Double.POSITIVE_INFINITY;
 				if((!actual.equals(goal))
-				&& (actual.rhs == g_old+1))
+				&& (actual.rhs == g_old))
 					actual.rhs = actual.update_bestChild().g+1;
 				UpdateVertex(actual);
 			}
@@ -185,44 +203,46 @@ public class AgentDStar{
 
 			//Exploro las acciones:
 			for (Node father : actual.generate_pred()) {
+				ACTIONS action = father.accion;
 				
 				Node node = father.getFrom(explorados);
 				if(node!=null) {
 					father=node;
+					father.h = father.get_relative_h_from(inicial);
+					explorados.remove(node);					
 				}
 				else {
 					father.g = Double.POSITIVE_INFINITY;
+					father.rhs = Double.POSITIVE_INFINITY;
 					father.h = father.get_relative_h_from(inicial);
 					maxMem++;					
 				}
 
-				father.childs.put(actual, father.accion);
+				father.childs.put(actual, action);
 
 				if(recalculate) {
-					if((!father.equals(goal)) 
-					&& (father.rhs == g_old+1)) {
+					if(father.rhs == g_old+1) {
 						father.hijo = father.update_bestChild();
 						if(father.hijo == null) {
 							father.rhs = Double.POSITIVE_INFINITY;
 						}
 						else {
-							father.rhs = father.update_bestChild().g + 1;							
+							father.rhs = father.hijo.g + 1;							
 						}
 					}	
 				}
-				else if(!father.equals(goal)) {
-					if(actual.g+1 < father.rhs) {
-						father.rhs = actual.g+1;
-						father.hijo = actual;
-					}
+				else if(actual.g+1 < father.rhs) {
+					father.rhs = actual.g+1;
+					father.hijo = actual;
+					father.accion = action;
 				}
-				
+
 				UpdateVertex(father);
 				
-				explorados.remove(node);					
 				explorados.add(father);
 				
 				System.out.print("HIJO: " + father);
+				
 			}
 		}
 		
@@ -231,17 +251,37 @@ public class AgentDStar{
 	public void updateCosts(StateObservation state, ElapsedCpuTimer timer) {
 		Node.lastState=state;
 		boolean isAnyChange = false;
-		for(Node node : explorados) {
+		
+		ListIterator<Node> lir = explorados.listIterator();
+
+		while (lir.hasNext()) {
+			Node node = lir.next();
 			if(node.exists_in(state, "wall", node.x, node.y)) {
 				isAnyChange=true;
 				node.rhs=Double.POSITIVE_INFINITY;
 				UpdateVertex(node);
+				explorados.remove(node);
+				lir = explorados.listIterator();
 			}
+
 		}
 		
 		if(isAnyChange) {
+			Node aux = new Node(state);
+			aux = aux.getFrom(explorados);
+			km += inicial.get_relative_h_from(aux);
+			inicial = aux;
+			
 			plan(state, timer);
 		}
+	}
+
+
+	public boolean is_goal(Node actual) {
+		if(actual.x == goal.x && actual.y == goal.y)
+			return true;
+		else
+			return false;
 	}
 
 }

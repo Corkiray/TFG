@@ -19,7 +19,7 @@ import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
-public class MainController extends AbstractPlayer{
+public class RTAStarController extends AbstractPlayer{
     public static String gameConfigFile;
 
     public MinizincInterface minizincInterface;
@@ -35,7 +35,7 @@ public class MainController extends AbstractPlayer{
 
 	private GameInformation gameInformation;
 
-	public MainController(StateObservation state, ElapsedCpuTimer timer) {
+	public RTAStarController(StateObservation state, ElapsedCpuTimer timer) {
 		// Load game information
 		Yaml yaml = new Yaml(new Constructor(GameInformation.class));
 		
@@ -58,7 +58,7 @@ public class MainController extends AbstractPlayer{
 	}
 	
     public static void setGameConfigFile(String path) {
-        MainController.gameConfigFile = path;
+        RTAStarController.gameConfigFile = path;
     }
 
 	public ACTIONS act(StateObservation state, ElapsedCpuTimer timer) {

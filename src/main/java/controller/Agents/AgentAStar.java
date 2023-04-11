@@ -99,9 +99,8 @@ public class AgentAStar{
 	public Node act(StateObservation state) {
 		Node next;
 		if(!plan.isEmpty()) {
-			next = plan.get(0);
+			next = plan.remove(0);
 			if(next.is_able(state)) {
-				plan.remove(0);							
 				return next;
 			}
 		}

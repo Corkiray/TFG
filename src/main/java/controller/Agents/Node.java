@@ -41,8 +41,6 @@ public class Node {
 	
 	public static ArrayList<String> recursosTotales;
 	
-
-	
 	
 	//Variables globales para contabilizar los objetivos
 	static boolean target_goto;
@@ -82,6 +80,7 @@ public class Node {
 	//Variable para D*
 	Map<Node, ACTIONS> childs;
 	Node hijo;
+	int last_km;
 
 	
 	
@@ -146,6 +145,7 @@ public class Node {
 		
 		childs = new HashMap<>();
 		hijo = null;
+		last_km = 0;
 	}
 
 	
@@ -182,7 +182,9 @@ public class Node {
 		target_enSuelo=false;
 		target_obtenido=false;
 		target_exit=false;
-				
+		target_x = (int) (state.getAvatarPosition().x / fescala.x);
+		target_y = (int) (state.getAvatarPosition().y / fescala.y);
+
 		if(objetive.get(0).contentEquals("take")) {
 			target_obtenido=true;
 			target_name = objetive.get(1);
@@ -231,7 +233,7 @@ public class Node {
 		ret.x = target_x;
 		ret.y = target_y;
 		ret.orientation = new Vector2d(1,0);
-		if(target_name.contains("recurso")) {
+		if(target_name.contains("recurso") && !ret.recursosObtenidos.contains(target_name)) {
 			ret.peso+=gameInformation.values_correspondence.get(target_name+"_peso");
 			ret.recursosObtenidos.add(target_name);
 			ret.recursosSuelo.remove(target_name);
@@ -400,6 +402,7 @@ public class Node {
     			", accion= " + accion + 
     			", g= " + g +
     			", rhs= " + rhs +
+    			", last_km= " + last_km +
     			", h= " + h +
     			", inPath " + inPath +
     			"}\n";
@@ -471,7 +474,7 @@ public class Node {
 				aux.y = y;
 				
 				if(aux.is_able(lastState)) {
-					aux.padre = this;
+					aux.hijo = this;
 					aux.accion = action;
 					aux.orientation = ori;					
 					pred.add(aux);
@@ -481,7 +484,7 @@ public class Node {
 		
 		aux = new Node(this);
 		aux.accion=ACTIONS.ACTION_USE;
-		aux.padre=this;
+		aux.hijo=this;
 		
 		if(aux.is_able(lastState)){
 			String recurso = null;
@@ -717,7 +720,35 @@ public class Node {
 		}
 		hijo = bestNode;
 		accion = childs.get(bestNode);
-		return padre;
+		return hijo;
 	}
+
+	
+	//Comparador que se usa para el orden en la cola de prioridad
+	static Comparator<Node> D_NodeComparator = new Comparator<Node>() {
+		public int compare(Node n1, Node n2) {
+			double k_1 = Math.min(n1.g, n1.rhs);
+			double k_2 = Math.min(n2.g, n2.rhs);
+			
+			int diff = (int) ( k_1 + n1.h + n1.last_km - k_2 - n2.h - n2.last_km);
+			if( diff > 0) return 1;
+			else if (diff < 0) return -1;
+			else {
+				diff = (int) (k_1 - k_2);
+				if (diff > 0) return 1;
+				else if (diff < 0) return -1;
+				else return 0;
+			}
+		}
+	};
+
+
+
+	public void update_key(int km, Node inicial) {
+		last_km = km;
+		h = get_relative_h_from(inicial);
+	}
+
+
 
 }
