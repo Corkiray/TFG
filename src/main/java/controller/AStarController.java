@@ -24,7 +24,7 @@ public class AStarController extends AbstractPlayer{
 
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
-	public AgentDStarLite agent;
+	public AgentAStar agent;
 	public Node actualNode;
 
 	ArrayList<String> agentGoal;
@@ -40,7 +40,7 @@ public class AStarController extends AbstractPlayer{
 		Yaml yaml = new Yaml(new Constructor(GameInformation.class));
 		
 		try {
-			InputStream inputStream = new FileInputStream(new File(gameConfigFile));
+			InputStream inputStream = new FileInputStream(new File(MainController.gameConfigFile));
 			this.gameInformation = yaml.load(inputStream);
 		} catch (FileNotFoundException e) {
 			System.out.println(e.getStackTrace());
@@ -49,7 +49,7 @@ public class AStarController extends AbstractPlayer{
 		minizincInterface = new MinizincInterface(gameInformation);
 		pddlPlanner = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state);
-		agent = new AgentDStarLite();
+		agent = new AgentAStar();
 
 		hayPDDLPlan = false;
 		hayAgentObjetive = false;
@@ -58,7 +58,7 @@ public class AStarController extends AbstractPlayer{
 	}
 	
     public static void setGameConfigFile(String path) {
-        AStarController.gameConfigFile = path;
+        MainController.gameConfigFile = path;
     }
 
 	public ACTIONS act(StateObservation state, ElapsedCpuTimer timer) {
@@ -81,10 +81,8 @@ public class AStarController extends AbstractPlayer{
 			System.out.print(agentGoal);
 
 			Node.setObjetive(agentGoal, state);
-			agent.initialize(state);
 			agent.plan(state, timer);
 			
-			//agent.clear();
 			hayAgentObjetive = true;
 		}
 		else if(agentNeedsReplan) {
@@ -92,15 +90,13 @@ public class AStarController extends AbstractPlayer{
 			agentNeedsReplan=false;
 		}
 		else {
-			agent.updateCosts(state, timer);
 			actualNode = agent.act(state);
 			if(actualNode == null) {
 				agentNeedsReplan=true;
 				action = ACTIONS.ACTION_NIL;
 			}
 			else {
-				if(actualNode.accion==ACTIONS.ACTION_NIL 
-				&& agent.is_goal(actualNode))
+				if(actualNode.accion==ACTIONS.ACTION_NIL)
 					hayAgentObjetive = false;
 				action = actualNode.accion;
 			}

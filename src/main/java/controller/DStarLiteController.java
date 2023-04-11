@@ -40,7 +40,7 @@ public class DStarLiteController extends AbstractPlayer{
 		Yaml yaml = new Yaml(new Constructor(GameInformation.class));
 		
 		try {
-			InputStream inputStream = new FileInputStream(new File(gameConfigFile));
+			InputStream inputStream = new FileInputStream(new File(MainController.gameConfigFile));
 			this.gameInformation = yaml.load(inputStream);
 		} catch (FileNotFoundException e) {
 			System.out.println(e.getStackTrace());

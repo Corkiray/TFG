@@ -3,7 +3,8 @@
 import java.util.Random;
 
 import controller.PDDL.PDDLInterface;
-import controller.MainController;
+import controller.*;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -53,7 +54,7 @@ public class GeneralTest {
 		String level = game.replace(gameName, gameName + "_lvl" + test.levelIdx);
 
 		// Controller
-		String controller = "controller.MainController";
+		String controller = "controller.LRTAStarController";
 
 		// Find out if the game has to be played by a human or by the agent
 		boolean humanPlayer = false;

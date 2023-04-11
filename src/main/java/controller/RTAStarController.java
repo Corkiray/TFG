@@ -24,7 +24,7 @@ public class RTAStarController extends AbstractPlayer{
 
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
-	public AgentDStarLite agent;
+	public AgentRTAStar agent;
 	public Node actualNode;
 
 	ArrayList<String> agentGoal;
@@ -40,7 +40,7 @@ public class RTAStarController extends AbstractPlayer{
 		Yaml yaml = new Yaml(new Constructor(GameInformation.class));
 		
 		try {
-			InputStream inputStream = new FileInputStream(new File(gameConfigFile));
+			InputStream inputStream = new FileInputStream(new File(MainController.gameConfigFile));
 			this.gameInformation = yaml.load(inputStream);
 		} catch (FileNotFoundException e) {
 			System.out.println(e.getStackTrace());
@@ -49,7 +49,7 @@ public class RTAStarController extends AbstractPlayer{
 		minizincInterface = new MinizincInterface(gameInformation);
 		pddlPlanner = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state);
-		agent = new AgentDStarLite();
+		agent = new AgentRTAStar();
 
 		hayPDDLPlan = false;
 		hayAgentObjetive = false;
@@ -81,29 +81,17 @@ public class RTAStarController extends AbstractPlayer{
 			System.out.print(agentGoal);
 
 			Node.setObjetive(agentGoal, state);
-			agent.initialize(state);
-			agent.plan(state, timer);
 			
-			//agent.clear();
+			agent.clear();
 			hayAgentObjetive = true;
 		}
-		else if(agentNeedsReplan) {
-			agent.plan(state, timer);
-			agentNeedsReplan=false;
-		}
 		else {
-			agent.updateCosts(state, timer);
-			actualNode = agent.act(state);
-			if(actualNode == null) {
-				agentNeedsReplan=true;
-				action = ACTIONS.ACTION_NIL;
-			}
-			else {
-				if(actualNode.accion==ACTIONS.ACTION_NIL 
-				&& agent.is_goal(actualNode))
-					hayAgentObjetive = false;
-				action = actualNode.accion;
-			}
+			actualNode = agent.act(state, timer);
+			
+			if(actualNode.accion==ACTIONS.ACTION_NIL)
+				hayAgentObjetive = false;
+			action = actualNode.accion;
+			
 			System.out.print(action);
 		}
 		
