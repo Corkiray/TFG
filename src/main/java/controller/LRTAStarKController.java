@@ -88,7 +88,7 @@ public class LRTAStarKController extends AbstractPlayer{
 		else {
 			actualNode = agent.act(state, timer);
 			
-			if(actualNode.accion==ACTIONS.ACTION_NIL)
+			if(actualNode.h==0)
 				hayAgentObjetive = false;
 			action = actualNode.accion;
 			

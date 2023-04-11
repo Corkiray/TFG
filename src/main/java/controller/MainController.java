@@ -24,7 +24,7 @@ public class MainController extends AbstractPlayer{
 
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
-	public AgentAStar agent;
+	public AgentLRTAStarK agent;
 	public Node actualNode;
 
 	ArrayList<String> agentGoal;
@@ -49,7 +49,7 @@ public class MainController extends AbstractPlayer{
 		minizincInterface = new MinizincInterface(gameInformation);
 		pddlPlanner = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state);
-		agent = new AgentAStar();
+		agent = new AgentLRTAStarK(100);
 
 		hayPDDLPlan = false;
 		hayAgentObjetive = false;
@@ -80,28 +80,24 @@ public class MainController extends AbstractPlayer{
 			agentGoal = pddlPlanner.getNextAction(state);
 			System.out.print(agentGoal);
 
-			Node.setObjetive(agentGoal, state);
-			agent.plan(state, timer);
+			//ArrayList<String> exit = new ArrayList<String>();
+			//exit.add("exit");
+			//Node.setObjetive(exit , state);
 			
+			Node.setObjetive(agentGoal , state);
+			
+			agent.clear();
 			hayAgentObjetive = true;
 		}
-		else if(agentNeedsReplan) {
-			agent.plan(state, timer);
-			agentNeedsReplan=false;
-		}
 		else {
-			actualNode = agent.act(state);
-			if(actualNode == null) {
-				agentNeedsReplan=true;
-				action = ACTIONS.ACTION_NIL;
-			}
-			else {
-				if(actualNode.accion==ACTIONS.ACTION_NIL)
+				actualNode = agent.act(state, timer);
+				
+				if(actualNode.h==0)
 					hayAgentObjetive = false;
 				action = actualNode.accion;
+				
+				System.out.print(action);
 			}
-			System.out.print(action);
-		}
 		
 		try {
 			Thread.sleep(100);
