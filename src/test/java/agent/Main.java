@@ -1,10 +1,10 @@
+package agent;
 
 
 import java.util.Random;
 
 import controller.PDDL.PDDLInterface;
-import controller.*;
-
+import controller.MainController;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -13,7 +13,7 @@ import tracks.ArcadeMachine;
 
 @Command(name = "GVGAI-PDDL", description = "Launches a new GVGAI game played by a planning agent or by a human.",
 		 mixinStandardHelpOptions = true, version = "1.0")
-public class GeneralTest {
+public class Main {
 
 	private int gameIdx = 122;
 
@@ -27,7 +27,7 @@ public class GeneralTest {
 
     public static void main(String[] args) {
     	// Load commandline arguments
-    	GeneralTest test = new GeneralTest();
+    	Main test = new Main();
     	CommandLine commandLine = new CommandLine(test);
     	commandLine.parseArgs(args);
 
@@ -54,7 +54,7 @@ public class GeneralTest {
 		String level = game.replace(gameName, gameName + "_lvl" + test.levelIdx);
 
 		// Controller
-		String controller = "controller.LRTAStarKController";
+		String controller = "controller.MainController";
 
 		// Find out if the game has to be played by a human or by the agent
 		boolean humanPlayer = false;
@@ -64,6 +64,7 @@ public class GeneralTest {
 			ArcadeMachine.playOneGame(game, level, null, seed);
 		} else {
 			MainController.setGameConfigFile(test.configurationFile);
+			PDDLInterface.setGameConfigFile(test.configurationFile);
 			PDDLInterface.setDebugMode(test.debugMode);
 			PDDLInterface.setSaveInformation(test.saveOutput);
 			ArcadeMachine.runOneGame(game, level, visuals, controller, null, seed, 0);

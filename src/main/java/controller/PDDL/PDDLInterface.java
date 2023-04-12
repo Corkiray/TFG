@@ -62,7 +62,6 @@ import java.util.stream.Stream;
  */
 public class PDDLInterface {
     // The following attributes can be modified
-    protected static String gameConfigFile;
     protected static boolean debugMode;
     protected static boolean saveInformation;
 
@@ -95,16 +94,9 @@ public class PDDLInterface {
      * @param stateObservation State observation of the game.
      * @param elapsedCpuTimer  Elapsed CPU time.
      */
-    public PDDLInterface(String gameConfigFile) {
+    public PDDLInterface(GameInformation gameInf) {
         // Load game information
-        Yaml yaml = new Yaml(new Constructor(GameInformation.class));
-
-        try {
-            InputStream inputStream = new FileInputStream(new File(gameConfigFile));
-            this.gameInformation = yaml.load(inputStream);
-        } catch (FileNotFoundException e) {
-            System.out.println(e.getStackTrace());
-        }
+        gameInformation = gameInf;
 
         // Initialize PDDL related variables
         this.PDDLGameStatePredicates = new ArrayList<>();
@@ -427,9 +419,6 @@ public class PDDLInterface {
         }
     }
 
-    public static void setGameConfigFile(String path) {
-        PDDLInterface.gameConfigFile = path;
-    }
 
     public static void setDebugMode(boolean debugMode) {
         PDDLInterface.debugMode = debugMode;
@@ -635,6 +624,7 @@ public class PDDLInterface {
         }
 
         plan = execute_metricff();
+        System.out.print(plan);
         translated_plan = translate_to_agent(plan);
         iterPlan = translated_plan.iterator();
 

@@ -1,0 +1,12 @@
+language: java
+jdk: openjdk8
+
+jobs:
+  include:
+    - os: linux
+      dist: xenial
+    - os: linux
+      dist: bionic
+
+intall: mvn install -DskipTests=true -B -V
+script: mvn test -B

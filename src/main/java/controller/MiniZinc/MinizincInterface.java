@@ -35,21 +35,13 @@ public class MinizincInterface {
     protected ArrayList<String> salida;
     protected static long executionTime = 0;
 
-    public MinizincInterface(String gameConfigFile) {
+    public MinizincInterface(GameInformation gameInf) {
     	//Inicializar variables
     	salida = new ArrayList<String>();
         gameState = new HashMap<String,ArrayList<String>>();
 
-	    // Load game information
-	    Yaml yaml = new Yaml(new Constructor(GameInformation.class));
-	    
-        try {
-            InputStream inputStream = new FileInputStream(new File(gameConfigFile));
-            this.gameInformation = yaml.load(inputStream);
-        } catch (FileNotFoundException e) {
-            System.out.println(e.getStackTrace());
-        }
-        
+        //load game information
+	    gameInformation = gameInf;        
     }
     
     public String plan(StateObservation state, ElapsedCpuTimer timer) {

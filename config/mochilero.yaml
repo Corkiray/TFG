@@ -85,3 +85,19 @@ pddl_to_agent_correspondence:
   RECURSO4: recurso4
   RECURSO5: recurso5
   RECURSO6: recurso6
+  SALIR: exit
+values_correspondence:
+  recurso1_peso: 1
+  recurso1_score: 1
+  recurso2_peso: 2
+  recurso2_score: 2
+  recurso3_peso: 3
+  recurso3_score: 3
+  recurso4_peso: 4
+  recurso4_score: 4
+  recurso5_peso: 1
+  recurso5_score: 5
+  recurso6_peso: 0
+  recurso6_score: 5
+  maxPeso: 10
+
