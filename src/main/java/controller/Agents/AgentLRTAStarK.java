@@ -121,7 +121,7 @@ public class AgentLRTAStarK{
 
 		return best;
 	}
-
+	
 	
 	ArrayList<Node> lookaheadUpdateK(Node root) {
 		boolean inRoot = true;
@@ -137,7 +137,6 @@ public class AgentLRTAStarK{
 			sucesores.clear();
 			Node actual = candidates.remove(0);
 
-			boolean updated=false;
 			//LookaheadUpdate1
 			for (Node child : actual.generate_succ()) {
 				Node node = child.getFrom(explorados);
@@ -148,7 +147,10 @@ public class AgentLRTAStarK{
 				}
 				else {
 					child.calcular_h();
-					explorados.add(child);					
+					child.support = null;
+					child.inPath = false;
+					explorados.add(child);	
+					
 				}
 				sucesores.add(child);
 			}
@@ -163,13 +165,6 @@ public class AgentLRTAStarK{
 			
 			if(actual.h < best.h+1) {
 				actual.h = best.h+1;
-				updated=true;
-			}
-			explorados.remove(actual);
-			explorados.add(actual);				
-			//end LookaheadUpdate1
-			
-			if(updated) {
 				for (Node child : sucesores) {		
 					if(cont > 0 && child.inPath && actual.equals(child.support)) {
 						System.out.print("CONT " + Integer.toString(cont) +"\n");
@@ -178,6 +173,9 @@ public class AgentLRTAStarK{
 					}
 				}
 			}
+			explorados.remove(actual);
+			explorados.add(actual);				
+
 		}
 		
 		return ret;
