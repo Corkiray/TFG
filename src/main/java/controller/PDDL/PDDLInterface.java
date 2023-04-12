@@ -624,6 +624,7 @@ public class PDDLInterface {
         }
 
         plan = execute_metricff();
+        System.out.print(plan);
         translated_plan = translate_to_agent(plan);
         iterPlan = translated_plan.iterator();
 
