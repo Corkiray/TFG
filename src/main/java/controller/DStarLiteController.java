@@ -33,6 +33,8 @@ public class DStarLiteController extends AbstractPlayer{
 	public boolean hayAgentObjetive;
 	public boolean agentNeedsReplan;
 
+	public ArrayList<ACTIONS> plan;
+
 	private GameInformation gameInformation;
 
 	public DStarLiteController(StateObservation state, ElapsedCpuTimer timer) {
@@ -55,6 +57,7 @@ public class DStarLiteController extends AbstractPlayer{
 		hayAgentObjetive = false;
 		agentNeedsReplan = false;
 		
+		plan = new ArrayList<ACTIONS> ();
 	}
 	
     public static void setGameConfigFile(String path) {
@@ -81,10 +84,15 @@ public class DStarLiteController extends AbstractPlayer{
 			System.out.print(agentGoal);
 
 			Node.setObjetive(agentGoal, state);
-			agent.initialize(state);
-			agent.plan(state, timer);
+	
+			if(agentGoal.get(0).contentEquals("drop")) {
+				plan = AgentDropper.plan(state);
+			}
+			else {				
+				agent.initialize(state);
+				agent.plan(state, timer);
+			}
 			
-			//agent.clear();
 			hayAgentObjetive = true;
 		}
 		else if(agentNeedsReplan) {
@@ -92,19 +100,25 @@ public class DStarLiteController extends AbstractPlayer{
 			agentNeedsReplan=false;
 		}
 		else {
-			agent.updateCosts(state, timer);
-			actualNode = agent.act(state);
-			if(actualNode == null) {
-				agentNeedsReplan=true;
-				action = ACTIONS.ACTION_NIL;
+			
+			if(!plan.isEmpty()) {
+				action =  plan.remove(0);
 			}
-			else {
-				if(actualNode.accion==ACTIONS.ACTION_NIL 
-				&& agent.is_goal(actualNode))
-					hayAgentObjetive = false;
-				action = actualNode.accion;
+			else {				
+				agent.updateCosts(state, timer);
+				actualNode = agent.act(state);
+				if(actualNode == null) {
+					agentNeedsReplan=true;
+					action = ACTIONS.ACTION_NIL;
+				}
+				else {
+					if(actualNode.accion==ACTIONS.ACTION_NIL 
+							&& agent.is_goal(actualNode))
+						hayAgentObjetive = false;
+					action = actualNode.accion;
+				}
+				System.out.print(action);
 			}
-			System.out.print(action);
 		}
 		
 		try {

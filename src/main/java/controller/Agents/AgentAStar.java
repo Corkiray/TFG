@@ -129,7 +129,7 @@ public class AgentAStar{
 			
 			actual = abiertos.poll();
 			
-			System.out.print("NODO PADRE: " + actual);
+			//System.out.print("NODO PADRE: " + actual);
 
 			nExpandidos++;
 			
@@ -138,7 +138,7 @@ public class AgentAStar{
 			//Exploro las acciones:
 			for (Node child : actual.generate_succ()) {
 				
-				System.out.print("HIJO: " + child);
+				//System.out.print("HIJO: " + child);
 
 				Node aux = child.getFrom(explorados);
 				if(aux!=null) {

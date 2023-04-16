@@ -32,6 +32,8 @@ public class AStarController extends AbstractPlayer{
 	public boolean hayPDDLPlan;
 	public boolean hayAgentObjetive;
 	public boolean agentNeedsReplan;
+	
+	public ArrayList<ACTIONS> plan;
 
 	private GameInformation gameInformation;
 
@@ -54,7 +56,8 @@ public class AStarController extends AbstractPlayer{
 		hayPDDLPlan = false;
 		hayAgentObjetive = false;
 		agentNeedsReplan = false;
-		
+				
+		plan = new ArrayList<ACTIONS> ();
 	}
 	
     public static void setGameConfigFile(String path) {
@@ -81,7 +84,13 @@ public class AStarController extends AbstractPlayer{
 			System.out.print(agentGoal);
 
 			Node.setObjetive(agentGoal, state);
-			agent.plan(state, timer);
+
+			if(agentGoal.get(0).contentEquals("drop")) {
+				plan = AgentDropper.plan(state);
+			}
+			else {				
+				agent.plan(state, timer);
+			}
 			
 			hayAgentObjetive = true;
 		}
@@ -90,15 +99,21 @@ public class AStarController extends AbstractPlayer{
 			agentNeedsReplan=false;
 		}
 		else {
-			actualNode = agent.act(state);
-			if(actualNode == null) {
-				agentNeedsReplan=true;
-				action = ACTIONS.ACTION_NIL;
+			
+			if(!plan.isEmpty()) {
+				action =  plan.remove(0);
 			}
-			else {
-				if(actualNode.accion==ACTIONS.ACTION_NIL)
-					hayAgentObjetive = false;
-				action = actualNode.accion;
+			else {				
+				actualNode = agent.act(state);
+				if(actualNode == null) {
+					agentNeedsReplan=true;
+					action = ACTIONS.ACTION_NIL;
+				}
+				else {
+					if(actualNode.accion==ACTIONS.ACTION_NIL)
+						hayAgentObjetive = false;
+					action = actualNode.accion;
+				}
 			}
 			System.out.print(action);
 		}

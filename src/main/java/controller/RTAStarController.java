@@ -34,6 +34,8 @@ public class RTAStarController extends AbstractPlayer{
 	public boolean agentNeedsReplan;
 
 	private GameInformation gameInformation;
+	
+	ArrayList<ACTIONS> plan;
 
 	public RTAStarController(StateObservation state, ElapsedCpuTimer timer) {
 		// Load game information
@@ -48,8 +50,10 @@ public class RTAStarController extends AbstractPlayer{
 		
 		minizincInterface = new MinizincInterface(gameInformation);
 		pddlPlanner = new PDDLInterface(gameInformation);
-		Node.initialize(gameInformation, state);
+		Node.initialize(gameInformation, state, true);
 		agent = new AgentRTAStar();
+		
+		plan = new ArrayList<ACTIONS>();
 
 		hayPDDLPlan = false;
 		hayAgentObjetive = false;
@@ -82,21 +86,40 @@ public class RTAStarController extends AbstractPlayer{
 
 			Node.setObjetive(agentGoal, state);
 			
-			agent.clear();
+			if(agentGoal.get(0).contentEquals("drop")) {
+				plan = AgentDropper.plan(state);
+			}
+			else {
+				agent.clear();
+				plan = agent.act(state, timer);
+			}
+			
 			hayAgentObjetive = true;
+			agentNeedsReplan = false;
 		}
-		else {
-			actualNode = agent.act(state, timer);
+		else if(agentNeedsReplan){
+			plan = agent.act(state, timer);
 			
-			if(actualNode.h==0)
-				hayAgentObjetive = false;
-			action = actualNode.accion;
-			
-			System.out.print(action);
+			agentNeedsReplan = false;
+						
 		}
 		
+		if(!agentNeedsReplan) {
+			if(!plan.isEmpty())
+				action = plan.remove(0);
+			
+			System.out.print(action);
+			
+			if(plan.isEmpty())
+				agentNeedsReplan = true;
+			
+			if(action == ACTIONS.ACTION_NIL)
+				hayAgentObjetive = false;	
+		}
+		
+		
 		try {
-			Thread.sleep(100);
+			Thread.sleep(0);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

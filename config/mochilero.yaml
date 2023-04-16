@@ -8,12 +8,12 @@ pddlCorrespondence:
   - (haySalida)
   recurso1:
   - (enSuelo Recurso1)
-  - (= (peso Recurso1) 3)
+  - (= (peso Recurso1) 1)
   - (= (posicion Recurso1) 1)
   recurso2:
   - (enSuelo Recurso2)
   - (requiere Recurso2 Recurso1)
-  - (= (peso Recurso2) 3)
+  - (= (peso Recurso2) 2)
   - (= (posicion Recurso2) 2)
   recurso3:
   - (enSuelo Recurso3)
@@ -23,20 +23,20 @@ pddlCorrespondence:
   recurso4:
   - (enSuelo Recurso4)
   - (requiere Recurso4 Recurso3)
-  - (= (peso Recurso4) 3)
+  - (= (peso Recurso4) 4)
   - (= (posicion Recurso4) 4)
   recurso5:
   - (enSuelo Recurso5)
   - (requiere Recurso5 Recurso4)
-  - (= (peso Recurso5) 3)
+  - (= (peso Recurso5) 2)
   - (= (posicion Recurso5) 5)
   recurso6:
   - (enSuelo Recurso6)
   - (requiere Recurso6 Recurso5)
-  - (= (peso Recurso6) 3)
+  - (= (peso Recurso6) 0)
   - (= (posicion Recurso6) 6)
   avatar:
-  - (= (maxPeso) 12)
+  - (= (maxPeso) 10)
   - (= (actualPeso) 0)
 minizincCorrespondence:
   recurso1:
@@ -85,7 +85,8 @@ pddl_to_agent_correspondence:
   RECURSO4: recurso4
   RECURSO5: recurso5
   RECURSO6: recurso6
-  SALIR: exit
+  SALIR: closedoor
+  SOLTAR: drop
 values_correspondence:
   recurso1_peso: 1
   recurso1_score: 1
@@ -95,7 +96,7 @@ values_correspondence:
   recurso3_score: 3
   recurso4_peso: 4
   recurso4_score: 4
-  recurso5_peso: 1
+  recurso5_peso: 2
   recurso5_score: 5
   recurso6_peso: 0
   recurso6_score: 5

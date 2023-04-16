@@ -25,29 +25,19 @@ public class Node {
 		        add(new Vector2d(0, -1));
 		        add(new Vector2d(0, 1));
 		    }});
-	public final int DROP_PENALTY = 10;
-
 	
+	public static boolean RTA_MODE;
 	
     public static GameInformation gameInformation;
         
     public static int MAX_X;
     public static int MAX_Y;
 	public static Vector2d fescala;
-
-	public static int maxPeso;	
 	
 	public static StateObservation lastState;
-	
-	public static ArrayList<String> recursosTotales;
-	
-	
-	//Variables globales para contabilizar los objetivos
-	static boolean target_goto;
-	static boolean target_enSuelo;
-	static boolean target_obtenido;
-	static boolean target_exit;
-	
+		
+		
+	static String objetive_type;
 	static String target_name;
 	static int target_x;
 	static int target_y;
@@ -58,10 +48,8 @@ public class Node {
 	int x; //Posición en el eje x dentro del mapa del juego
 	int y; //Posición en el eje y dentro del mapa del juego
 	Vector2d orientation;
-	int peso;
-	Map<String, Vector2d> recursosSuelo;
-	ArrayList<String> recursosObtenidos;
 
+	
 	Node padre; //Nodo padre
 	public ACTIONS accion; //Acción que se realizó para llegar a e´l
 	public double f; //(g + h)
@@ -69,6 +57,9 @@ public class Node {
 	public double h; //coste hurístico para llegar
 	
 
+	//Variables para RTA
+	int c;
+	
 	//Variables para LRTA_K
 	boolean inPath;
 	Node support;
@@ -86,9 +77,7 @@ public class Node {
 	
 	public static void initialize(GameInformation gameInf, StateObservation state) {
 		gameInformation = gameInf;
-		
-		setResources(state);
-		
+				
 		MAX_X = state.getObservationGrid().length;
 		MAX_Y =	state.getObservationGrid()[0].length;
 		
@@ -98,7 +87,13 @@ public class Node {
 			state.getWorldDimension().height / MAX_Y );
 		
 		lastState = state.copy();
-		maxPeso = gameInformation.values_correspondence.get("maxPeso");
+		
+		RTA_MODE = false;
+	}
+	
+	public static void initialize(GameInformation gameInf, StateObservation state, boolean rta_mode) {
+		initialize(gameInf, state);
+		RTA_MODE = rta_mode;
 	}
 	
 	//Constructor en base a un estado
@@ -111,30 +106,10 @@ public class Node {
 		x = (int) (stateObservation.getAvatarPosition().x / fescala.x);
 		y = (int) (stateObservation.getAvatarPosition().y / fescala.y);
 		orientation = stateObservation.getAvatarOrientation();
-		
-		recursosSuelo = new HashMap<String, Vector2d>();
-		for(ArrayList<Observation> observationList : stateObservation.getResourcesPositions()){			
-			for (Observation observation : observationList) {
-				String resource = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
-				int aux_x = (int) (observation.position.x / fescala.x);
-				int aux_y = (int) (observation.position.y / fescala.y);
-				recursosSuelo.put(resource, new Vector2d(aux_x, aux_y));
-			}
-		}
 				
-		peso = 0;
-		recursosObtenidos = new ArrayList<String>();
-		for(String recurso : recursosTotales) {
-			if(!recursosSuelo.containsKey(recurso)) {
-				recursosObtenidos.add(recurso);
-				String name_aux = recurso+"_peso";
-				peso += gameInformation.values_correspondence.get(name_aux);	
-			}
-		}	
-		
-		
 		lastState = stateObservation;
 		
+		c=0;
 		
 		inPath=false;
 		support=null;
@@ -151,7 +126,6 @@ public class Node {
 	
 	//Constructor en base a un vector que almacena como padre al nodo pasado como segundo parámetro
 	//Constructor de copia
-	@SuppressWarnings("unchecked")
 	public Node(Node original) {
 		x = original.x;
 		y = original.y;
@@ -160,12 +134,10 @@ public class Node {
 		f = original.f;
 		g = original.g;
 		h = original.h;
-		peso = original.peso;
+		c = original.c;
 		orientation = original.orientation;
 		inPath=original.inPath;
 		support=original.support;
-		recursosSuelo = new HashMap<String, Vector2d>(original.recursosSuelo);
-		recursosObtenidos = (ArrayList<String>) original.recursosObtenidos.clone();
 		
 		rhs=Double.POSITIVE_INFINITY;
 		pred = new HashMap<Node, ACTIONS>();
@@ -175,56 +147,37 @@ public class Node {
 	}
 	
 	
-	public static void setObjetive(ArrayList<String> objetive, StateObservation state){
-		//lastState=state;
+	public static void setObjetive(ArrayList<String> objetive, StateObservation state){		
+		lastState = state;
 		
-		target_goto=false;
-		target_enSuelo=false;
-		target_obtenido=false;
-		target_exit=false;
 		target_x = (int) (state.getAvatarPosition().x / fescala.x);
 		target_y = (int) (state.getAvatarPosition().y / fescala.y);
 
 		if(objetive.get(0).contentEquals("take")) {
-			target_obtenido=true;
+			objetive_type = "goto";
 			target_name = objetive.get(1);
+		}
+		if(objetive.get(0).contentEquals("closedoor")) {			
+			objetive_type = "goto";
+			target_name = objetive.get(0);
+		}
+		if(objetive.get(0).contentEquals("drop")) {
+			objetive_type = "drop";
+			target_name = objetive.get(1);
+		}
 
-			ArrayList<Observation>[] posiciones = state.getResourcesPositions();
-			for(ArrayList<Observation> observationList : posiciones){			
-				for (Observation observation : observationList) {
-					String resource = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
-					if(resource.contentEquals(target_name)) {
-						target_goto = true;
+		for (ArrayList<Observation>[] fila : state.getObservationGrid()) {
+			for(ArrayList<Observation> celda : fila) {
+				for(Observation observation : celda) {
+					String obs_name = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
+					if(obs_name.contentEquals(target_name)) {
 						target_x = (int) (observation.position.x / fescala.x);
 						target_y = (int) (observation.position.y / fescala.y);
-					}
+					}						
 				}
-			}	
+			}
 		}
-
-		if(objetive.get(0).contentEquals("exit")) {
-			ArrayList<Observation>[] posiciones = state.getPortalsPositions();
-			for(ArrayList<Observation> observationList : posiciones){			
-				for (Observation observation : observationList) {
-					String name = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
-					if(name.contentEquals("closedoor")) {
-						target_goto = true;
-						target_x = (int) (observation.position.x / fescala.x);
-						target_y = (int) (observation.position.y / fescala.y);
-					}
-				}
-			}	
-		}
-		
-		if(objetive.get(0).contentEquals("exists")){
-			target_enSuelo=true;
-			target_name = objetive.get(1);
-		}
-
-		if(objetive.get(0).contentEquals("not_exists")){
-			target_obtenido=true;
-			target_name = objetive.get(1);
-		}
+	
 	}
 	
 	
@@ -233,11 +186,6 @@ public class Node {
 		ret.x = target_x;
 		ret.y = target_y;
 		ret.orientation = new Vector2d(1,0);
-		if(target_name.contains("recurso") && !ret.recursosObtenidos.contains(target_name)) {
-			ret.peso+=gameInformation.values_correspondence.get(target_name+"_peso");
-			ret.recursosObtenidos.add(target_name);
-			ret.recursosSuelo.remove(target_name);
-		}
 		
 		return ret;
 	}
@@ -256,26 +204,13 @@ public class Node {
 		if(dif_y != 0 && start.orientation.y != dif_y/Math.abs(dif_y))
 			h+=1;
 		
-		if(start.peso > peso){
-			h+=1;
-		}
-		
 		return h;
 	}
 	
 	public double calcular_h(){
 		h = 0;
-		
-		if(target_obtenido) {
-			for(String recurso : recursosObtenidos) {
-				if(recurso.contentEquals(target_name)) {
-					return h;
-				}
-			}
-		}
-		
-		
-		if(target_goto) {
+				
+		if(objetive_type.contentEquals("goto")) {
 			double dif_x = target_x - x;
 			double dif_y = target_y - y;
 			//Tengo en cuenta la distancia
@@ -286,64 +221,13 @@ public class Node {
 				h+=1;
 			if(dif_y != 0 && orientation.y != dif_y/Math.abs(dif_y))
 				h+=1;
-			
-			if(target_obtenido) {
-				String aux_name = target_name+"_peso";
-				int needed_peso = gameInformation.values_correspondence.get(aux_name);
-				if (peso+needed_peso > maxPeso)
-					h+=1;
-			}
-		}
-		
-		/*
-		if(target_exit)
-			if (state.isGameOver()) {
-				h=0;
-				return h;
-			}
 
-		//Tengo en cuenta la existencia del objeto
-		boolean exists = false;
-		if(target_obtenido || target_enSuelo) {
-			ArrayList<Observation>[] posiciones = state.getResourcesPositions();
-			for(ArrayList<Observation> observationList : posiciones){			
-				for (Observation observation : observationList) {
-					String resource = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
-					if(resource.contentEquals(target_name)) {
-						exists = true;
-					}
-				}
-			}				
-			if((exists && target_notExists) || (!exists && target_exists))
-				h+=1;
-			else {
-				h=0;
-				return 0;
-			}
-		}	
-		
-		if(target_goto) {
-			double dif_x = target_x - x;
-			double dif_y = target_y - y;
-			
-			//Tengo en cuenta la distancia
-			h+=Math.abs(dif_x) + Math.abs(dif_y);			
-		
-			//Y la orientacion
-			if(dif_x != 0 && orientation.x != dif_x/Math.abs(dif_x))
-				h+=1;
-			if(dif_y != 0 && orientation.y == dif_y/Math.abs(dif_y))
-				h+=1;
-			
-			if(dif_x != 0 || dif_y != 0) {
-				h+=drops*DROP_PENALTY;
-			}
-			else {
-				h=0;
-			}
-			
 		}
-		*/
+		
+		if(objetive_type.contentEquals("drop")) {
+			//POR TERMINAR AAAA
+		}
+		
 		return h;
 	}
 	
@@ -363,11 +247,9 @@ public class Node {
     	if((e.x != x) || (e.y != y)) 
     		return false;
     	
-    	if(!e.orientation.equals(orientation))
-    		return false;
-    	
-    	if(e.peso != peso) {
-    		return false;
+    	if(!RTA_MODE) {
+    		if(!e.orientation.equals(orientation))
+    			return false;  		
     	}
     	
     	return true;
@@ -398,7 +280,6 @@ public class Node {
     	return "Nodo{" + 
     			"posicion= (" + x + ", " + y + ") " +
     			"orientacion= " + orientation +
-    			", peso= " + peso +
     			", accion= " + accion + 
     			", g= " + g +
     			", rhs= " + rhs +
@@ -429,9 +310,9 @@ public class Node {
 		}
 	};
 	
-	static Comparator<Node> H_NodeComparator = new Comparator<Node>() {
+	static Comparator<Node> RTA_NodeComparator = new Comparator<Node>() {
 		public int compare(Node n1, Node n2) {
-			double diff = n1.h - n2.h;
+			double diff = n1.h + n1.c - n2.h - n2.c;
 			if( diff > 0) return 1;
 			else if (diff < 0) return -1;
 			else {
@@ -455,13 +336,6 @@ public class Node {
 				aux.x = x - (int) ori.x;
 				aux.y = y - (int) ori.y;
 				if(aux.is_able(lastState)) {
-					//Si habia un recurso en esta posición y lo tiene, se suelta
-					String recurso = aux.extrac_from(lastState, "recurso", x, y);
-					if(recurso!=null && recursosObtenidos.contains(recurso)) {
-						aux.recursosObtenidos.remove(recurso);
-						aux.recursosSuelo.put(recurso,new Vector2d(x, y));
-						aux.peso-= gameInformation.values_correspondence.get(recurso+"_peso");
-					}
 					aux.orientation = ori;
 					aux.hijo=this;
 					aux.accion=action;
@@ -472,7 +346,6 @@ public class Node {
 			else {
 				aux.x = x;
 				aux.y = y;
-				
 				if(aux.is_able(lastState)) {
 					aux.hijo = this;
 					aux.accion = action;
@@ -481,27 +354,7 @@ public class Node {
 				}
 			}			
 		}	
-		
-		aux = new Node(this);
-		aux.accion=ACTIONS.ACTION_USE;
-		aux.hijo=this;
-		
-		if(aux.is_able(lastState)){
-			String recurso = null;
-			for(Entry<String, Vector2d> set : recursosSuelo.entrySet()) {
-				if((set.getValue().x == x+orientation.x) && (set.getValue().y == y+orientation.y)) {
-					recurso = set.getKey();
-					break;
-				}
-			}
-			if(recurso != null) {
-				aux.recursosSuelo.remove(recurso);
-				aux.recursosObtenidos.add(recurso);
-				aux.peso+= gameInformation.values_correspondence.get(recurso+"_peso");
-				pred.add(aux);
-			}	
-		}
-		
+				
 		return pred;
 	}
 	
@@ -515,16 +368,6 @@ public class Node {
 				aux.x = x + (int) ori.x;
 				aux.y = y + (int) ori.y;
 				if(aux.is_able(lastState)) {					
-					String recurso = get_resource(aux.x, aux.y);
-					if(recurso != null && checkPreconditions(recurso)) {
-						String name_aux = recurso+"_peso";
-						int needed_peso = gameInformation.values_correspondence.get(name_aux);	
-						if(needed_peso+peso <= maxPeso) {
-							aux.recursosObtenidos.add(recurso);
-							aux.recursosSuelo.remove(recurso);
-							aux.peso+=needed_peso;
-						}
-					}
 					aux.padre = this;
 					aux.orientation=ori;
 					aux.accion = get_action(ori);
@@ -551,6 +394,9 @@ public class Node {
 			}			
 		}	
 		
+		
+		/*
+
 		aux = new Node(this);
 		aux.accion=ACTIONS.ACTION_USE;
 		aux.padre=this;
@@ -568,30 +414,36 @@ public class Node {
 			succ.add(aux);		
 		}
 		
+		*/
+		
 		return succ;
 	}
 
-	private boolean checkPreconditions(String recurso) {
-		int len = recurso.length();
-		int num = Character.getNumericValue(recurso.charAt(len-1));
-		num--;
-		if(num==0)
-			return true;
-		else {
-			for(String str : recursosObtenidos) {
-				if(str.equals("recurso"+num))
-					return true;
-			}
+	ArrayList<Node> generate_rta_succ(){
+		ArrayList<Node> succ = new ArrayList<Node>();
+		Node aux;
+		
+		for(Vector2d ori : orientations) {
+			aux = new Node(this);
+			aux.x = x + (int) ori.x;
+			aux.y = y + (int) ori.y;
+			if(aux.is_able(lastState)) {					
+				if(orientation.equals(ori)) {
+					aux.c = 1;
+				}
+				else {
+					aux.c = 2;
+				}
+				
+				aux.padre = this;
+				aux.accion = get_action(ori);
+				aux.orientation = ori;
+				
+				succ.add(aux);
+			}				
 		}
-		return false;
-	}
-
-	String get_resource(double x, double y) {
-		for(Entry<String, Vector2d> set : recursosSuelo.entrySet()) {
-			if((set.getValue().x == x) && (set.getValue().y == y))
-				return set.getKey();
-		}
-		return null;
+		
+		return succ;
 	}
 	
 	ACTIONS get_action(Vector2d orientation) {
@@ -632,9 +484,17 @@ public class Node {
 	public boolean is_able(StateObservation state) {
 		if(x >= MAX_X || x < 0 || y >= MAX_Y || y < 0)
 			return false;
+		for(Observation obs : state.getObservationGrid()[x][y]) {
+			String name = VGDLRegistry.GetInstance().getRegisteredSpriteKey(obs.itype).toLowerCase();
+			if(name.contains(target_name))
+				return true;
+			else if(name.contains("wall"))
+				return false;
+			else if(name.contains("recurso"))
+				return false;
+			
+		}
 		
-		if(exists_in(state, "wall", x, y))
-			return false;
 		if(accion == ACTIONS.ACTION_USE){
 			int aux_x = (int) (x+orientation.x);
 			int aux_y = (int) (y+orientation.y);
@@ -642,7 +502,10 @@ public class Node {
 				return false;
 			if(exists_in(state, "wall", aux_x, aux_y))
 				return false;
+			if(exists_in(state, "recurso", aux_x, aux_y))
+				return false;
 		}
+		
 		return true;
 	}
 	
@@ -654,18 +517,7 @@ public class Node {
 		}
 		return null;
 	}
-	
-	public static void setResources(StateObservation state) {
-		recursosTotales = new ArrayList<String>();
 		
-		for(ArrayList<Observation> observationList : state.getResourcesPositions()){			
-			for (Observation observation : observationList) {
-				String resource = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
-				recursosTotales.add(resource);
-			}
-		}	
-	}
-	
 	//Comparador que se usa para el orden en la cola de prioridad
 	static Comparator<Node> LPA_NodeComparator = new Comparator<Node>() {
 		public int compare(Node n1, Node n2) {

@@ -2,8 +2,8 @@ set of int: posibles_recursos = 1..6;
 
 int: maxPeso = 10;
 
-array [posibles_recursos] of int: pesos = [1,2,3,4,5,1];
-array [posibles_recursos] of int: valores = [1,2,3,4,5,6];
+array [posibles_recursos] of int: pesos = [1,2,3,4,2,0];
+array [posibles_recursos] of int: valores = [1,2,3,4,5,5];
 array [posibles_recursos] of var 0..1: estanEscogidos;
 array [posibles_recursos] of var 0..1: estanEnMapa;
 
