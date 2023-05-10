@@ -71,7 +71,7 @@ BasicGame
     dropper floor > transformAndChangeResource stype=recurso2 avatar=avatar resource=peso value=-2 scoreChange=-2
     dropper floor > transformAndChangeResource stype=recurso3 avatar=avatar resource=peso value=-3 scoreChange=-3
     dropper floor > transformAndChangeResource stype=recurso4 avatar=avatar resource=peso value=-4 scoreChange=-4
-    dropper floor > transformAndChangeResource stype=recurso5 avatar=avatar resource=peso value=-1 scoreChange=-5
+    dropper floor > transformAndChangeResource stype=recurso5 avatar=avatar resource=peso value=-2 scoreChange=-5
     dropper floor > transformAndChangeResource stype=recurso6 avatar=avatar resource=peso value=0 scoreChange=-5
 
     avatar r1key > killIfHeld heldResource=Null
@@ -85,7 +85,7 @@ BasicGame
     avatar recurso2 > changeResourceIfHeld heldResource=r1key resource=peso value=2 scoreChange=2
     avatar recurso3 > changeResourceIfHeld heldResource=r2key resource=peso value=3 scoreChange=3
     avatar recurso4 > changeResourceIfHeld heldResource=r3key resource=peso value=4 scoreChange=4
-    avatar recurso5 > changeResourceIfHeld heldResource=r4key resource=peso value=1 scoreChange=5
+    avatar recurso5 > changeResourceIfHeld heldResource=r4key resource=peso value=2 scoreChange=5
     avatar recurso6 > changeResourceIfHeld heldResource=r5key resource=peso value=0 scoreChange=5
 			
     enemy background > refreshVisionState avatar=avatar range=4

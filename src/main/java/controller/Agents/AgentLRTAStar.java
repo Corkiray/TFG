@@ -56,40 +56,42 @@ public class AgentLRTAStar{
      * @param elapsedTimer Timer when the action returned is due.
 	 * @return 	la acción a realizar en esta iteración
 	 */
-	public Node act(StateObservation state, ElapsedCpuTimer timer) {
+	public ArrayList<ACTIONS> act(StateObservation state, ElapsedCpuTimer timer) {
 		//Genero el nodo inicial y le inicio las variables de heurística
 		Node root = new Node(state);
 
 		System.out.print("\nPosición del jugador: [" + root.x+ " " + root.y + "]\n"
 				+ "Posición del objetivo: [" + Node.target_x+ " " +Node.target_y + "]\n");
-
+		
+		if(root.calcular_h() == 0) {
+			ArrayList<ACTIONS> ret = new ArrayList<ACTIONS> ();
+			ret.add(ACTIONS.ACTION_NIL);
+			return ret;
+		}
 
 		//Llamo al algoritmo de búsqueda, que devolverá la acción a realizar
 		long tInicio = System.nanoTime();
-		Node child = LRTAStar(root);
+		ArrayList<ACTIONS> plan = LRTAStar(root);
 		//Como se llama múltiples veces al algoritmo, y el Runtime es acumulado, voy sumándolos
 		runTime += (System.nanoTime()-tInicio); 
 		
 		tamRuta++;
 		
-		//Compruebo si esta acción va a hacer llegar al portal. En ese caso, imprimo antes los datos de la planificación
-		if(child.h == 0){
-			System.out.print(" Runtime(ms): " + runTime/1000000.0 + 
-					",\n Tamaño de la ruta calculada: " + tamRuta +
-					",\n Número de nodos expandidos: " + nExpandidos +
-					",\n Máximo número de nodos en memoria: " + maxMem +
-					"\n");				
-		}
-
-		return child;
+		System.out.print(" Runtime(ms): " + runTime + 
+				",\n Tamaño de la ruta calculada: " + tamRuta +
+				",\n Número de nodos expandidos: " + nExpandidos +
+				",\n Máximo número de nodos en memoria: " + maxMem +
+				",\n Plan:\n" + plan.toString() +
+				"\n");
+		
+		return plan;
 	}
 	
 	//Algoritmo RTAstar
-	public Node LRTAStar(Node actual) {
+	public ArrayList<ACTIONS> LRTAStar(Node actual) {
 		nExpandidos++; //Cada vez que llamo al algoritmo, expando el nodo en el que está el avatar.
 		
 
-		
 		//Si un nodo no está explorado, inicializo la heurística actual por la generada matemáticamente.
 		Node aux = actual.getFrom(explorados);
 		if(aux!=null) {
@@ -103,9 +105,9 @@ public class AgentLRTAStar{
 		System.out.print("NODO PADRE: " + actual);
 
 		//Cola de sucesores, que se ordenarán por prioridad
-		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.H_NodeComparator);
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.RTA_NodeComparator);
 		
-		for (Node child : actual.generate_succ()) {
+		for (Node child : actual.generate_rta_succ()) {
 
 			//Si ya está visitado,le establezco la heurística como la que tiene el algoritmo guardada para esa posición
 			aux = child.getFrom(explorados);
@@ -125,16 +127,25 @@ public class AgentLRTAStar{
 		
 		//Extraigo el hijo que tenga menor coste (según la heurística)
 		Node best = sucesores.poll();	
-
+				
 		//Si la nueva heurística es mejor que la que tenía almacenado el algoritmo, se actualiza
-		if(actual.h < best.h + 1) {
+		if(actual.h < best.h + best.c) {
 			explorados.remove(actual);
-			actual.h = best.h + 1;
+			actual.h = best.h + best.c;
 			explorados.add(actual);
 		}
-			
-		return best;		
+		
+		ArrayList<ACTIONS> plan = new ArrayList<ACTIONS>();
+		
+		plan.add(best.accion);
+		
+		if(!best.orientation.equals(actual.orientation))
+			plan.add(best.accion);
+		
+		return plan;		
 	}
-	
+
 }
+
+
 

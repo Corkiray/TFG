@@ -13,10 +13,6 @@ import tools.Vector2d;
 
 public class AgentLRTAStarK{
 	
-	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
-			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
-
-	boolean hayPlan;
 	ArrayList <ACTIONS> plan;
 	
 	ArrayList<Node> explorados;
@@ -40,7 +36,6 @@ public class AgentLRTAStarK{
 		explorados = new ArrayList<Node>();
 		
 		//Inicializo el plan a vacío
-		hayPlan = false;
 		plan = new ArrayList<ACTIONS>();
 		
 		//Inicializo los resultados a 0
@@ -60,7 +55,7 @@ public class AgentLRTAStarK{
      * @param elapsedTimer Timer when the action returned is due.
 	 * @return 	la acción a realizar en esta iteración
 	 */
-	public Node act(StateObservation state, ElapsedCpuTimer timer) {
+	public ArrayList<ACTIONS> act(StateObservation state, ElapsedCpuTimer timer) {
 		//Genero el nodo inicial y le inicio las variables de heurística
 		Node root = new Node(state);
 		root.inPath=true;
@@ -69,33 +64,38 @@ public class AgentLRTAStarK{
 		//		+ "Posición del objetivo: [" + Node.target_x+ " " +Node.target_y + "]\n");
 
 
+		if(root.calcular_h() == 0) {
+			ArrayList<ACTIONS> ret = new ArrayList<ACTIONS> ();
+			ret.add(ACTIONS.ACTION_NIL);
+			return ret;
+			
+		}
+
 		//Llamo al algoritmo de búsqueda, que devolverá la acción a realizar
 		long tInicio = System.nanoTime();
-		Node child = LRTAStar(root);
+		ArrayList<ACTIONS> plan = LRTAStar(root);
 		//Como se llama múltiples veces al algoritmo, y el Runtime es acumulado, voy sumándolos
 		runTime += (System.nanoTime()-tInicio); 
 		
 		tamRuta++;
-		
-		//Compruebo si esta acción va a hacer llegar al portal. En ese caso, imprimo antes los datos de la planificación
-		if(child.h == 0){
-			System.out.print(" Runtime(ms): " + runTime/1000000.0 + 
-					",\n Tamaño de la ruta calculada: " + tamRuta +
-					",\n Número de nodos expandidos: " + nExpandidos +
-					",\n Máximo número de nodos en memoria: " + maxMem +
-					"\n");				
-		}
 
-		return child;
+		System.out.print(" Runtime(ms): " + runTime + 
+				",\n Tamaño de la ruta calculada: " + tamRuta +
+				",\n Número de nodos expandidos: " + nExpandidos +
+				",\n Máximo número de nodos en memoria: " + maxMem +
+				",\n Plan:\n" + plan.toString() +
+				"\n");
+		
+		return plan;
 	}
 	
 	//Algoritmo
-	public Node LRTAStar(Node actual) {
+	public ArrayList<ACTIONS> LRTAStar(Node actual) {
 		actual.inPath = true;
 
 		nExpandidos++; //Cada vez que llamo al algoritmo, expando el nodo en el que está el avatar.
 
-		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.H_NodeComparator);
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.RTA_NodeComparator);
 
 		Node node = actual.getFrom(explorados);
 		if(node!=null) {
@@ -119,7 +119,14 @@ public class AgentLRTAStarK{
 		
 		Node best = sucesores.poll();
 
-		return best;
+		ArrayList<ACTIONS> plan = new ArrayList<ACTIONS>();
+		
+		plan.add(best.accion);
+		
+		if(!best.orientation.equals(actual.orientation))
+			plan.add(best.accion);
+			
+		return plan;		
 	}
 	
 	
@@ -131,14 +138,14 @@ public class AgentLRTAStarK{
 		ArrayList<Node> candidates = new ArrayList<Node>();
 		candidates.add(root);
 		
-		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.H_NodeComparator);
+		PriorityQueue<Node> sucesores = new PriorityQueue<Node>(Node.RTA_NodeComparator);
 		
 		while(!candidates.isEmpty()) {
 			sucesores.clear();
 			Node actual = candidates.remove(0);
 
 			//LookaheadUpdate1
-			for (Node child : actual.generate_succ()) {
+			for (Node child : actual.generate_rta_succ()) {
 				Node node = child.getFrom(explorados);
 				if(node!=null) {
 					child.h = node.h;
@@ -156,15 +163,15 @@ public class AgentLRTAStarK{
 			}
 			
 			if(inRoot) {
-				ret = new ArrayList<Node>(sucesores);
 				inRoot=false;
+				ret = new ArrayList<Node>(sucesores);
 			}
 			
 			Node best = sucesores.peek();
 			actual.support = best;
 			
-			if(actual.h < best.h+1) {
-				actual.h = best.h+1;
+			if(actual.h < best.h+best.c) {
+				actual.h = best.h+best.c;
 				for (Node child : sucesores) {		
 					if(cont > 0 && child.inPath && actual.equals(child.support)) {
 						System.out.print("CONT " + Integer.toString(cont) +"\n");
@@ -180,8 +187,6 @@ public class AgentLRTAStarK{
 		
 		return ret;
 	}
-
-	
 	
 }
 
