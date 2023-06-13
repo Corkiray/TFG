@@ -31,14 +31,12 @@ public class MinizincInterface {
     // Game information data structure (loaded from a .yaml file) and file path
     //protected GameInformation gameInformation;
 
-    protected Map<String, ArrayList<String>> gameState;
     protected ArrayList<String> salida;
     protected static long executionTime = 0;
 
     public MinizincInterface(GameInformation gameInf) {
     	//Inicializar variables
     	salida = new ArrayList<String>();
-        gameState = new HashMap<String,ArrayList<String>>();
 
         //load game information
 	    gameInformation = gameInf;        
@@ -47,13 +45,14 @@ public class MinizincInterface {
     public String plan(StateObservation state, ElapsedCpuTimer timer) {
     	
     	generate_dzn(state);
-    	execute_solver();
+    	ArrayList<String> salida = execute_solver();
     	String goals = translate_to_PDDL(salida);
     	
     	executionTime+=timer.elapsedMillis();
     	
     	return goals;
     }
+    
     
     public ArrayList<String> execute_solver() {   	
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -89,57 +88,18 @@ public class MinizincInterface {
         return salida;
     }
     
-    /**
-     * Method that translates a game state observation to a matrix of strings which
-     * represent the elements of the game in each position according to the VGDDL
-     * registry. There can be more than one game element in each position.
-     *
-     * @param stateObservation State observation of the game.
-     * @return Returns a matrix containing the elements of the game in each position.
-     */
-    public HashSet<String>[][] getGameElementsMatrix(StateObservation stateObservation) {
-        // Get the current game state
-        ArrayList<Observation>[][] gameState = stateObservation.getObservationGrid();
+    
+    public void generate_dzn(StateObservation state) {
+        Map<String, ArrayList<String>> gameState = new HashMap<String,ArrayList<String>>(); ;
 
-        // Get the number of X tiles and Y tiles
-        final int X_MAX = gameState.length, Y_MAX = gameState[0].length;
-
-        // Create a new matrix, representing the game's map
-        HashSet<String>[][] gameStringMap = new HashSet[X_MAX][Y_MAX];
-
-        // Iterate over the map and transform the observations in a [x, y] cell
-        // to a HashSet of Strings. In case there's no observation, add a
-        // "background" string. The VGDLRegistry contains the needed information
-        // to transform the StateObservation to a matrix of sets of Strings.
-        for (int y = 0; y < Y_MAX; y++) {
-            for (int x = 0; x < X_MAX; x++) {
-                gameStringMap[x][y] = new HashSet<>();
-
-                if (gameState[x][y].size() > 0) {
-                    for (int i = 0; i < gameState[x][y].size(); i++) {
-                        int itype = gameState[x][y].get(i).itype;
-                        gameStringMap[x][y].add(VGDLRegistry.GetInstance().getRegisteredSpriteKey(itype));
-                    }
-                } else {
-                    gameStringMap[x][y].add("background");
-                }
-            }
-        }
-
-        return gameStringMap;
-    }
- 
-    //AAAATERMINAR
-    public void setGameState(StateObservation stateObservation) {   	
-        // Get the observations of the game state as elements of the VGDDLRegistry
-        HashSet<String>[][] gameMap = this.getGameElementsMatrix(stateObservation);
+    	//Extraemos la información usando el estado del juego y la información dada
+        ArrayList<Observation>[][] gameMap = state.getObservationGrid();
         
-        final int X_MAX = gameMap.length, Y_MAX = gameMap[0].length;
-
         // Process game elements
-        for (int y = 0; y < Y_MAX; y++) {
-            for (int x = 0; x < X_MAX; x++) {
-                for (String cellObservation : gameMap[x][y]) {
+        for (ArrayList<Observation>[] observationListList : gameMap) {
+        	for(ArrayList<Observation> observationList : observationListList) {
+        		for (Observation observation : observationList) {
+        			String cellObservation = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
                     if (gameInformation.minizincCorrespondence.containsKey(cellObservation)) {
                     	Map<String, ArrayList<String>> map = (Map<String, ArrayList<String>>) gameInformation.minizincCorrespondence.get(cellObservation);
                     	//System.out.print(map.get("existe")+"\n");
@@ -148,7 +108,7 @@ public class MinizincInterface {
                 }
             }
         }
-        
+                
         for (String key : gameInformation.minizincCorrespondence.keySet()){
         	if (gameState.get(key) == null){
             	Map<String, ArrayList<String>> map = (Map<String, ArrayList<String>>) gameInformation.minizincCorrespondence.get(key);
@@ -156,13 +116,7 @@ public class MinizincInterface {
             	//System.out.print(map.get("no_existe")+"\n");
         	}
         }
-        	
-    }
-    
-    public void generate_dzn(StateObservation state) {
-    	//Extraemos la informaciÃ³n usando el estado del juego y la informaciÃ³n dada
-    	setGameState(state);
-    	
+        
     	//Guardamos en gameState en el fichero de salida
         File outputDataFile = new File(gameInformation.dzn_dataFile);
 

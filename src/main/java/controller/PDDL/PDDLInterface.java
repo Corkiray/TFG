@@ -54,12 +54,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Planning agent class. It represents an agent which uses a planner to reach
- * a set of goals. See {@link Agenda} to find out how goals are structured.
- *
- * @author Vladislav Nikolov Vasilev
- */
+
 public class PDDLInterface {
     // The following attributes can be modified
     protected static boolean debugMode;
@@ -88,12 +83,7 @@ public class PDDLInterface {
     // Logger
     private final static Logger LOGGER = Logger.getLogger(PDDLInterface.class.getName());
 
-    /**
-     * Class constructor. Creates a new planning agent.
-     *
-     * @param stateObservation State observation of the game.
-     * @param elapsedCpuTimer  Elapsed CPU time.
-     */
+ 
     public PDDLInterface(GameInformation gameInf) {
         // Load game information
         gameInformation = gameInf;
@@ -108,24 +98,24 @@ public class PDDLInterface {
         this.iterPlan = translated_plan.iterator();
 
         // If the agent must save the information, create directories and initialize logger
-        if (PDDLInterface.saveInformation) {
+        if (saveInformation) {
 
             // Ignore handlers used by parent loggers
             LOGGER.setUseParentHandlers(false);
 
-            // Set locale language to english (logs should be in English :) )
+            // Set locale language to english
             Locale.setDefault(Locale.ENGLISH);
 
             try {
                 // Add a file handler to the logger
                 FileHandler fh = new FileHandler("output/game_execution.log");
-                PDDLInterface.LOGGER.addHandler(fh);
+                LOGGER.addHandler(fh);
 
                 // Set logger's formatter
                 SimpleFormatter formatter = new SimpleFormatter();
                 fh.setFormatter(formatter);
 
-                PDDLInterface.LOGGER.info("Created agent successfully!");
+                LOGGER.info("Created agent successfully!");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -143,7 +133,7 @@ public class PDDLInterface {
      * current turn.
      */
     
-    public ArrayList<String> getNextAction(StateObservation stateObservation) {
+    public ArrayList<String> getNextAction() {
 		callsPlan+=1;
 
 		ArrayList<String> action = this.iterPlan.next();
@@ -212,7 +202,7 @@ public class PDDLInterface {
      * @return Returns a new PDDLPlan instance.
      * @throws PlannerException Thrown when the planner's response status is not OK.
      */
-    public ArrayList<String> execute_metricff() throws PlannerException {
+    public ArrayList<String> execute_metricff() {
         // Read domain and problem files
         ProcessBuilder processBuilder = new ProcessBuilder();
 
@@ -266,20 +256,19 @@ public class PDDLInterface {
      *
      * @param stateObservation State observation of the game.
      */
-    public void translateGameStateToPDDL(StateObservation stateObservation) {
-        // Get the observations of the game state as elements of the VGDDLRegistry
-        HashSet<String>[][] gameMap = this.getGameElementsMatrix(stateObservation);
-
+    public void translateGameStateToPDDL(StateObservation state) {
         // Clear the list of predicates and objects
         this.PDDLGameStatePredicates.clear();
         //this.PDDLGameStateObjects.values().stream().forEach(val -> val.clear());
 
-        final int X_MAX = gameMap.length, Y_MAX = gameMap[0].length;
-
+    	//Extraemos la información usando el estado del juego y la información dada
+        ArrayList<Observation>[][] gameMap = state.getObservationGrid();
+        
         // Process game elements
-        for (int y = 0; y < Y_MAX; y++) {
-            for (int x = 0; x < X_MAX; x++) {
-                for (String cellObservation : gameMap[x][y]) {
+        for (ArrayList<Observation>[] observationListList : gameMap) {
+        	for(ArrayList<Observation> observationList : observationListList) {
+        		for (Observation observation : observationList) {
+        			String cellObservation = VGDLRegistry.GetInstance().getRegisteredSpriteKey(observation.itype);
                     // If the observation is in the domain, instantiate its predicates
                     if (this.gameInformation.pddlCorrespondence.containsKey(cellObservation)) {
                         List<String> predicateList = this.gameInformation.pddlCorrespondence.get(cellObservation);
@@ -292,49 +281,10 @@ public class PDDLInterface {
                             this.PDDLGameStatePredicates.add(predicateInstance);
                         }
                     }
+
                 }
             }
         }
-    }
-
-    /**
-     * Method that translates a game state observation to a matrix of strings which
-     * represent the elements of the game in each position according to the VGDDL
-     * registry. There can be more than one game element in each position.
-     *
-     * @param stateObservation State observation of the game.
-     * @return Returns a matrix containing the elements of the game in each position.
-     */
-    public HashSet<String>[][] getGameElementsMatrix(StateObservation stateObservation) {
-        // Get the current game state
-        ArrayList<Observation>[][] gameState = stateObservation.getObservationGrid();
-
-        // Get the number of X tiles and Y tiles
-        final int X_MAX = gameState.length, Y_MAX = gameState[0].length;
-
-        // Create a new matrix, representing the game's map
-        HashSet<String>[][] gameStringMap = new HashSet[X_MAX][Y_MAX];
-
-        // Iterate over the map and transform the observations in a [x, y] cell
-        // to a HashSet of Strings. In case there's no observation, add a
-        // "background" string. The VGDLRegistry contains the needed information
-        // to transform the StateObservation to a matrix of sets of Strings.
-        for (int y = 0; y < Y_MAX; y++) {
-            for (int x = 0; x < X_MAX; x++) {
-                gameStringMap[x][y] = new HashSet<>();
-
-                if (gameState[x][y].size() > 0) {
-                    for (int i = 0; i < gameState[x][y].size(); i++) {
-                        int itype = gameState[x][y].get(i).itype;
-                        gameStringMap[x][y].add(VGDLRegistry.GetInstance().getRegisteredSpriteKey(itype));
-                    }
-                } else {
-                    gameStringMap[x][y].add("background");
-                }
-            }
-        }
-
-        return gameStringMap;
     }
 
     /**
@@ -443,26 +393,6 @@ public class PDDLInterface {
 
 
     /**
-     * Method that reads the content of a given file.
-     *
-     * @param filename Path of the file to be read.
-     * @return Returns the content of the file.
-     */
-    private String readFile(String filename) {
-        // Create builder that will contain the file's content
-        StringBuilder contentBuilder = new StringBuilder();
-
-        // Get content from file line per line
-        try (Stream<String> stream = Files.lines(Paths.get(filename))) {
-            stream.forEach(s -> contentBuilder.append(s).append("\n"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return contentBuilder.toString();
-    }
-
-    /**
      * Method that prints an array of messages and asks the user to select some
      * of the available options. These options include displaying information about
      * the agenda, displaying information about the current plan or continuing the
@@ -518,64 +448,6 @@ public class PDDLInterface {
         }
     }
 
-    /**
-     * Method that creates the output directories in which the generated files
-     * will be stored. If the root output directory already exists, it is
-     * deleted recursively.
-     */
-    private void createOutputDirectories() {
-        // List of directories
-        List<String> directories = Stream.of("output", "output/problems", "output/plans")
-                .collect(Collectors.toList());
-
-        // Delete top-level directory recursively if it exists
-        if (Files.exists(Paths.get(directories.get(0)))) {
-            try {
-                Files.walk(Paths.get(directories.get(0)))
-                        .map(Path::toFile)
-                        .sorted(Comparator.reverseOrder())
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Create output directories
-        for (String dir : directories) {
-            new File(dir).mkdir();
-        }
-    }
-
-    /**
-     * Method that saves the plan generated by the planner into a file within
-     * the output directories structure. It is saved in the directory
-     * 'output/plans'.
-     *
-     * @param plannerResponse
-     */
-    private void savePlan(JSONObject plannerResponse) {
-        String planFileName = String.format("output/plans/plan.txt");
-        StringBuilder sb = new StringBuilder();
-
-        // Get the plan from the JSON object
-        JSONArray plan = plannerResponse.getJSONObject("result").getJSONArray("plan");
-
-        // Add each action description to the builder
-        for (int i = 0; i < plan.length(); i++) {
-            String actionDescription = plan.getJSONObject(i).getString("action");
-            sb.append(String.format("\n%s\n", actionDescription));
-        }
-
-        try (BufferedWriter bf = new BufferedWriter(
-                new FileWriter(planFileName))) {
-            bf.write(sb.toString());
-
-            // Save logging information
-            PDDLInterface.LOGGER.info(String.format("Plan saved to file %s", planFileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     
     public void set_goal(String input) {
     	goal = input;
@@ -596,9 +468,9 @@ public class PDDLInterface {
         scanner.nextLine();
     }
 
-	public ArrayList<ArrayList<String>> findplan(StateObservation state, ElapsedCpuTimer elapsedCpuTimer) {	
+	public ArrayList<ArrayList<String>> findplan(StateObservation state, ElapsedCpuTimer timer) {	
         // Translate game state to PDDL predicates
-        this.translateGameStateToPDDL(state);
+        translateGameStateToPDDL(state);
 
         // SHOW DEBUG INFORMATION
         if (PDDLInterface.debugMode) {
@@ -633,7 +505,7 @@ public class PDDLInterface {
             this.displayDebugInformation("Translated output plan");
         }
         
-        executionTime = elapsedCpuTimer.elapsedMillis();
+        executionTime = timer.elapsedMillis();
 
 		return translated_plan;
 	}

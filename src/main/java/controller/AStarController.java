@@ -25,7 +25,7 @@ public class AStarController extends AbstractPlayer{
     public MinizincInterface minizincInterface;
 	public PDDLInterface pddlPlanner;
 	public AgentAStar agent;
-	public Node actualNode;
+	public Node currenNode;
 
 	ArrayList<String> agentGoal;
 	
@@ -80,13 +80,13 @@ public class AStarController extends AbstractPlayer{
 			hayPDDLPlan = true;
 		}
 		else if(!hayAgentObjetive){
-			agentGoal = pddlPlanner.getNextAction(state);
+			agentGoal = pddlPlanner.getNextAction();
 			System.out.print(agentGoal);
 
 			Node.setObjetive(agentGoal, state);
 
 			if(agentGoal.get(0).contentEquals("drop")) {
-				plan = AgentDropper.plan(state);
+				plan = Dropper.plan(state);
 			}
 			else {				
 				agent.plan(state, timer);
@@ -104,15 +104,14 @@ public class AStarController extends AbstractPlayer{
 				action =  plan.remove(0);
 			}
 			else {				
-				actualNode = agent.act(state);
-				if(actualNode == null) {
+				currenNode = agent.act(state);
+				if(currenNode == null) {
 					agentNeedsReplan=true;
-					action = ACTIONS.ACTION_NIL;
 				}
 				else {
-					if(actualNode.accion==ACTIONS.ACTION_NIL)
+					action = currenNode.get_action();
+					if(action==ACTIONS.ACTION_NIL)
 						hayAgentObjetive = false;
-					action = actualNode.accion;
 				}
 			}
 			System.out.print(action);

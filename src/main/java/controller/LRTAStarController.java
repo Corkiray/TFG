@@ -23,7 +23,7 @@ public class LRTAStarController extends AbstractPlayer{
     public static String gameConfigFile;
 
     public MinizincInterface minizincInterface;
-	public PDDLInterface pddlPlanner;
+	public PDDLInterface pddlInterface;
 	public AgentLRTAStar agent;
 	public Node actualNode;
 
@@ -49,7 +49,7 @@ public class LRTAStarController extends AbstractPlayer{
 		}
 		
 		minizincInterface = new MinizincInterface(gameInformation);
-		pddlPlanner = new PDDLInterface(gameInformation);
+		pddlInterface = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state, true);
 		agent = new AgentLRTAStar();
 		
@@ -73,22 +73,21 @@ public class LRTAStarController extends AbstractPlayer{
 			System.out.print("\n"+goals+"\n");
 			
 			
-			pddlPlanner.set_goal(goals);
-			ArrayList<ArrayList<String>> plan = pddlPlanner.findplan(state, timer);
+			pddlInterface.set_goal(goals);
+			ArrayList<ArrayList<String>> plan = pddlInterface.findplan(state, timer);
 			System.out.print("\n"+plan+"\n");
 					
 			
 			hayPDDLPlan = true;
-
 		}
 		else if(!hayAgentObjetive){
-			agentGoal = pddlPlanner.getNextAction(state);
+			agentGoal = pddlInterface.getNextAction();
 			System.out.print(agentGoal);
 			
 			Node.setObjetive(agentGoal, state);
 			
 			if(agentGoal.get(0).contentEquals("drop")) {
-				plan = AgentDropper.plan(state);
+				plan = Dropper.plan(state);
 			}
 			else {
 				agent.clear();

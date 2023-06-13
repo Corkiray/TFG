@@ -23,7 +23,7 @@ public class MainController extends AbstractPlayer{
     public static String gameConfigFile;
 
     public MinizincInterface minizincInterface;
-	public PDDLInterface pddlPlanner;
+	public PDDLInterface pddlInterface;
 	public AgentAStar agent;
 	public Node actualNode;
 
@@ -47,7 +47,7 @@ public class MainController extends AbstractPlayer{
 		}
 		
 		minizincInterface = new MinizincInterface(gameInformation);
-		pddlPlanner = new PDDLInterface(gameInformation);
+		pddlInterface = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state);
 		agent = new AgentAStar();
 
@@ -69,15 +69,15 @@ public class MainController extends AbstractPlayer{
 			System.out.print("\n"+goals+"\n");
 			
 			
-			pddlPlanner.set_goal(goals);
-			ArrayList<ArrayList<String>> plan = pddlPlanner.findplan(state, timer);
+			pddlInterface.set_goal(goals);
+			ArrayList<ArrayList<String>> plan = pddlInterface.findplan(state, timer);
 			System.out.print("\n"+plan+"\n");
 					
 			
 			hayPDDLPlan = true;
 		}
 		else if(!hayAgentObjetive){
-			agentGoal = pddlPlanner.getNextAction(state);
+			agentGoal = pddlInterface.getNextAction();
 			System.out.print(agentGoal);
 
 			//ArrayList<String> exit = new ArrayList<String>();

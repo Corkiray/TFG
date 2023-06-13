@@ -23,9 +23,9 @@ public class DStarLiteController extends AbstractPlayer{
     public static String gameConfigFile;
 
     public MinizincInterface minizincInterface;
-	public PDDLInterface pddlPlanner;
+	public PDDLInterface pddlInterface;
 	public AgentDStarLite agent;
-	public Node actualNode;
+	public Node currentNode;
 
 	ArrayList<String> agentGoal;
 	
@@ -49,7 +49,7 @@ public class DStarLiteController extends AbstractPlayer{
 		}
 		
 		minizincInterface = new MinizincInterface(gameInformation);
-		pddlPlanner = new PDDLInterface(gameInformation);
+		pddlInterface = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state);
 		agent = new AgentDStarLite();
 
@@ -72,21 +72,21 @@ public class DStarLiteController extends AbstractPlayer{
 			System.out.print("\n"+goals+"\n");
 			
 			
-			pddlPlanner.set_goal(goals);
-			ArrayList<ArrayList<String>> plan = pddlPlanner.findplan(state, timer);
+			pddlInterface.set_goal(goals);
+			ArrayList<ArrayList<String>> plan = pddlInterface.findplan(state, timer);
 			System.out.print("\n"+plan+"\n");
 					
 			
 			hayPDDLPlan = true;
 		}
 		else if(!hayAgentObjetive){
-			agentGoal = pddlPlanner.getNextAction(state);
+			agentGoal = pddlInterface.getNextAction();
 			System.out.print(agentGoal);
 
 			Node.setObjetive(agentGoal, state);
 	
 			if(agentGoal.get(0).contentEquals("drop")) {
-				plan = AgentDropper.plan(state);
+				plan = Dropper.plan(state);
 			}
 			else {				
 				agent.initialize(state);
@@ -106,16 +106,16 @@ public class DStarLiteController extends AbstractPlayer{
 			}
 			else {				
 				agent.updateCosts(state, timer);
-				actualNode = agent.act(state);
-				if(actualNode == null) {
+				currentNode = agent.act(state);
+				if(currentNode == null) {
 					agentNeedsReplan=true;
 					action = ACTIONS.ACTION_NIL;
 				}
 				else {
-					if(actualNode.accion==ACTIONS.ACTION_NIL 
-							&& agent.is_goal(actualNode))
+					if(currentNode.get_action()==ACTIONS.ACTION_NIL 
+							&& agent.is_goal(currentNode))
 						hayAgentObjetive = false;
-					action = actualNode.accion;
+					action = currentNode.get_action();
 				}
 				System.out.print(action);
 			}

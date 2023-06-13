@@ -54,7 +54,7 @@ public class GeneralTest {
 		String level = game.replace(gameName, gameName + "_lvl" + test.levelIdx);
 
 		// Controller
-		String controller = "controller.DStarLiteController";
+		String controller = "tracks.singlePlayer.advanced.sampleMCTS.Agent";
 
 		// Find out if the game has to be played by a human or by the agent
 		boolean humanPlayer = false;

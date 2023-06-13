@@ -6,7 +6,7 @@ import core.game.StateObservation;
 import ontology.Types.ACTIONS;
 import tools.Vector2d;
 
-public class AgentDropper {
+public class Dropper {
 	public static final ArrayList<Vector2d> orientations = new ArrayList<Vector2d>(
 		    new ArrayList<Vector2d>() {{
 		        add(new Vector2d(-1, 0));

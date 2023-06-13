@@ -3,7 +3,6 @@
     (:objects
     )
     (:init
-        (haySalida)
         (enSuelo Recurso6)
         (requiere Recurso6 Recurso5)
         (= (peso Recurso6) 0)
@@ -16,10 +15,8 @@
         (requiere Recurso4 Recurso3)
         (= (peso Recurso4) 4)
         (= (posicion Recurso4) 4)
-        (enSuelo Recurso5)
-        (requiere Recurso5 Recurso4)
-        (= (peso Recurso5) 2)
-        (= (posicion Recurso5) 5)
+        (= (maxPeso) 10)
+        (= (actualPeso) 0)
         (enSuelo Recurso2)
         (requiere Recurso2 Recurso1)
         (= (peso Recurso2) 2)
@@ -27,8 +24,11 @@
         (enSuelo Recurso1)
         (= (peso Recurso1) 1)
         (= (posicion Recurso1) 1)
-        (= (maxPeso) 10)
-        (= (actualPeso) 0)
+        (enSuelo Recurso5)
+        (requiere Recurso5 Recurso4)
+        (= (peso Recurso5) 2)
+        (= (posicion Recurso5) 5)
+        (haySalida)
     )
     (:goal
         (AND

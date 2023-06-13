@@ -601,6 +601,10 @@ public class Node {
 		h = get_relative_h_from(inicial);
 	}
 
+	
+	public ACTIONS get_action() {
+		return accion;
+	}
 
 
 }
