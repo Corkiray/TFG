@@ -26,11 +26,13 @@ public class AgentAStar{
 	boolean hayPlan;
 	ArrayList <Node> plan;
 	
-	int nExpandidos; //Número de nodos que han sido expandidos(se ha comprobado si es objetivo)
+	int nExpandidos; //Número de nodos que han sido expandidos
 	int maxMem; //Número máximo de nodos almacenados en memoria
-	int tamRuta; //Número de nodos transitados por el agente
-	double runTime; //Tiempo, en milisegundos, usado para calcular el plan
-	
+	int numPlans; //Número de veces que se ha planificado
+	int tamRuta; //Tamaño del plan calculado
+	double runTime;
+	double totalRunTime; //Tiempo, en milisegundos, total utilizado
+
 	
 
 	
@@ -47,8 +49,9 @@ public class AgentAStar{
 		//Inicializo los resultados a 0
 		nExpandidos = 0;
 		maxMem = 0;
+		numPlans = 0;
 		tamRuta = 0;
-		
+		totalRunTime = 0;
 	}
 		
 	
@@ -78,13 +81,18 @@ public class AgentAStar{
 		}
 		tamRuta = plan.size();
 		if(tamRuta==0) plan.add(root);
-
+		
+		
+		numPlans++;
+		totalRunTime += runTime;
+		
 		//Imprimo los datos de la planificación
 		System.out.print(" Runtime(ms): " + runTime + 
+				",\n Runtime total: " + totalRunTime +
 				",\n Tamaño de la ruta calculada: " + tamRuta +
 				",\n Número de nodos expandidos: " + nExpandidos +
 				",\n Máximo número de nodos en memoria: " + maxMem +
-				",\n Plan:\n" + plan.toString() +
+				",\n Número de veces que se ha planificado: " + numPlans +
 				"\n");
 	}
 
@@ -122,7 +130,6 @@ public class AgentAStar{
 		//Aunque el coste de ir al nodo inicial teóricamente es 0, lo pongo como 1 y dejo el 0 reservado para indicar que ese nodo no está explorado
 		abiertos.add(inicial);
 		explorados.add(inicial);
-		maxMem++;
 		
 
 		while (true){
@@ -133,7 +140,10 @@ public class AgentAStar{
 
 			nExpandidos++;
 			
-			if(actual.h==0) return actual;
+			if(actual.h==0) {
+				if(explorados.size() > maxMem) maxMem = explorados.size();
+				return actual;
+			}
 					
 			//Exploro las acciones:
 			for (Node child : actual.generate_succ()) {
@@ -152,7 +162,6 @@ public class AgentAStar{
 				else {
 					abiertos.add(child);
 					explorados.add(child);
-					maxMem++;
 				}
 				
 				/*
@@ -189,6 +198,6 @@ public class AgentAStar{
 			}
 		//Como el nodo ya ha sido explorado, se añade a cerrados
 		//cerrados.add(actual);
-		}
+		}		
 	}
 }

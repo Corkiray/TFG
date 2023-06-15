@@ -13,18 +13,16 @@ import tools.Vector2d;
 
 public class AgentLRTAStar{
 	
-	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
-			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE, ACTIONS.ACTION_NIL};
-
-	boolean hayPlan;
 	ArrayList <ACTIONS> plan;
 	
 	ArrayList<Node> explorados;
 	
-	int nExpandidos; //Número de nodos que han sido expandidos(se ha comprobado si es objetivo)
+	int nExpandidos; //Número de nodos que han sido expandidos
 	int maxMem; //Número máximo de nodos almacenados en memoria
-	int tamRuta; //Número de nodos transitados por el agente
-	double runTime; //Tiempo, en milisegundos, usado para calcular el plan
+	int numPlans; //Número de veces que se ha planificado
+	int tamRuta; //Tamaño del plan calculado
+	double runTime;
+	double totalRunTime; //Tiempo, en milisegundos, total utilizado
 	
 	/**
 	 * initialize all variables for the agent
@@ -36,13 +34,14 @@ public class AgentLRTAStar{
 		explorados = new ArrayList<Node>();
 		
 		//Inicializo el plan a vacío
-		hayPlan = false;
 		plan = new ArrayList<ACTIONS>();
 		
 		//Inicializo los resultados a 0
 		nExpandidos = 0;
 		maxMem = 0;
+		numPlans = 0;
 		tamRuta = 0;
+		totalRunTime = 0;
 		
 	}
 	
@@ -73,16 +72,22 @@ public class AgentLRTAStar{
 		long tInicio = System.nanoTime();
 		ArrayList<ACTIONS> plan = LRTAStar(root);
 		//Como se llama múltiples veces al algoritmo, y el Runtime es acumulado, voy sumándolos
-		runTime += (System.nanoTime()-tInicio); 
-		
-		tamRuta++;
-		
-		System.out.print(" Runtime(ms): " + runTime + 
+		runTime = (System.nanoTime()-tInicio); 
+		tamRuta = plan.size();
+
+		numPlans++;
+		totalRunTime += runTime/1000000.0;
+		if(explorados.size() > maxMem) maxMem = explorados.size();
+
+		//Imprimo los datos de la planificación
+		System.out.print(" Runtime: " + runTime + 
+				",\n Runtime total (ms): " + totalRunTime +
 				",\n Tamaño de la ruta calculada: " + tamRuta +
 				",\n Número de nodos expandidos: " + nExpandidos +
 				",\n Máximo número de nodos en memoria: " + maxMem +
-				",\n Plan:\n" + plan.toString() +
+				",\n Número de veces que se ha planificado: " + numPlans +
 				"\n");
+
 		
 		return plan;
 	}

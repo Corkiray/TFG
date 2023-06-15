@@ -492,7 +492,8 @@ public class Node {
 				return false;
 			else if(name.contains("recurso"))
 				return false;
-			
+			else if(name.contains("door"))
+				return false;			
 		}
 		
 		if(accion == ACTIONS.ACTION_USE){

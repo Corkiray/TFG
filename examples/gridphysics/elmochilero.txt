@@ -89,7 +89,6 @@ BasicGame
     avatar recurso6 > changeResourceIfHeld heldResource=r5key resource=peso value=0 scoreChange=5
 			
     enemy background > refreshVisionState avatar=avatar range=4
-
     unknownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
     knownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
     visibleFloor background > transformIfAvatarFar avatar=avatar range=4 stype=knownFloor
@@ -97,6 +96,7 @@ BasicGame
     unknownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
     knownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
     visibleWall background > transformIfAvatarFar avatar=avatar range=4 stype=knownWall
+
 	
   TerminationSet
     SpriteCounter stype=closedoor  win=True

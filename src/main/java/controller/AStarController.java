@@ -117,11 +117,13 @@ public class AStarController extends AbstractPlayer{
 			System.out.print(action);
 		}
 		
+		/*
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		*/
 		
 		return action;
 	}

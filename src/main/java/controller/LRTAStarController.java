@@ -117,12 +117,13 @@ public class LRTAStarController extends AbstractPlayer{
 				hayAgentObjetive = false;	
 		}
 		
-		
+		/*
 		try {
 			Thread.sleep(0);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		*/
 		
 		return action;
 	}

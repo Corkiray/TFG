@@ -27,10 +27,12 @@ public class AgentDStarLite{
 	boolean hayPlan;
 	ArrayList <Node> plan;
 	
-	int nExpandidos; //Número de nodos que han sido expandidos(se ha comprobado si es objetivo)
+	int nExpandidos; //Número de nodos que han sido expandidos
 	int maxMem; //Número máximo de nodos almacenados en memoria
-	int tamRuta; //Número de nodos transitados por el agente
-	double runTime; //Tiempo, en milisegundos, usado para calcular el plan
+	int numPlans; //Número de veces que se ha planificado
+	int tamRuta; //Tamaño del plan calculado
+	double totalRunTime; //Tiempo, en milisegundos, total utilizado
+	double runTime;
 	
 	PriorityQueue<Node> abiertos;
 	//Lista donde se guardarán los nodos explorados
@@ -55,7 +57,9 @@ public class AgentDStarLite{
 		//Inicializo los resultados a 0
 		nExpandidos = 0;
 		maxMem = 0;
+		numPlans = 0;
 		tamRuta = 0;
+		totalRunTime=0;
 		
 		abiertos  = new PriorityQueue<Node>(Node.D_NodeComparator);
 
@@ -70,9 +74,9 @@ public class AgentDStarLite{
 
 		//Llamo al algoritmo de búsqueda, que devolverá el último nodo del camino encontrado
 		long tInicio = System.nanoTime();
-		System.out.print("Entramos en astar\n");
+		System.out.print("Entramos en Dstar\n");
 		ComputeShortestPath();
-		System.out.print("salimos de astar\n");
+		System.out.print("salimos de Dstar\n");
 		runTime = (System.nanoTime()-tInicio)/1000000.0;
 		hayPlan = true;
 
@@ -80,17 +84,23 @@ public class AgentDStarLite{
 		plan.clear();
 		Node ultimo = inicial;
 		while(!ultimo.equals(goal)) {
-			System.out.print(ultimo);
+			//System.out.print(ultimo);
 			plan.add(ultimo);
 			ultimo = ultimo.hijo;			
 		}
 		tamRuta = plan.size();
-
+		
+		numPlans++;
+		if(explorados.size() > maxMem) maxMem = explorados.size();
+		totalRunTime += runTime;
+		
 		//Imprimo los datos de la planificación
-		System.out.print(" Runtime(ms): " + runTime + 
+		System.out.print(" Runtime(ms): " + runTime + 	
+				",\n Runtime total: " + totalRunTime +
 				",\n Tamaño de la ruta calculada: " + tamRuta +
 				",\n Número de nodos expandidos: " + nExpandidos +
 				",\n Máximo número de nodos en memoria: " + maxMem +
+				",\n Número de veces que se ha planificado: " + numPlans +
 				"\n");
 	}
 
@@ -145,7 +155,7 @@ public class AgentDStarLite{
 		if(abiertos.contains(node)) abiertos.remove(node);
 		node.update_key(km, inicial);
 		if(node.g != node.rhs) abiertos.add(node);
-		System.out.print(abiertos);
+		//System.out.print(abiertos);
 	}
 	
 	//Algoritmo AStar
@@ -157,15 +167,13 @@ public class AgentDStarLite{
 		while (true){
 			boolean recalculate = false;
 			
-			System.out.print(abiertos.toString());
+			//System.out.print(abiertos.toString());
 
 			actual = abiertos.poll();
 			
 			nExpandidos++;
 
-			System.out.print("NODO PADRE: " + actual);
-
-			System.out.print(inicial);
+			//System.out.print("NODO PADRE: " + actual);
 			
 			if(actual.equals(inicial)) 
 				inicial=actual;
@@ -173,14 +181,7 @@ public class AgentDStarLite{
 			if((Node.D_NodeComparator.compare(actual, inicial) >= 0)
 					&&	(inicial.rhs <= inicial.g)) {
 				break;
-			}
-
-			try {
-				Thread.sleep(0);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
+			}			
 			
 			if(actual.last_km < km) {
 				actual.update_key(km, inicial);
@@ -215,7 +216,6 @@ public class AgentDStarLite{
 					father.g = Double.POSITIVE_INFINITY;
 					father.rhs = Double.POSITIVE_INFINITY;
 					father.h = father.get_relative_h_from(inicial);
-					maxMem++;					
 				}
 
 				father.childs.put(actual, action);
@@ -241,7 +241,7 @@ public class AgentDStarLite{
 				
 				explorados.add(father);
 				
-				System.out.print("HIJO: " + father);
+				//System.out.print("HIJO: " + father);
 				
 			}
 		}
@@ -253,7 +253,7 @@ public class AgentDStarLite{
 		boolean isAnyChange = false;
 		
 		ListIterator<Node> lir = explorados.listIterator();
-
+		
 		while (lir.hasNext()) {
 			Node node = lir.next();
 			if(node.exists_in(state, "wall", node.x, node.y)) {

@@ -31,8 +31,9 @@ public class MinizincInterface {
     // Game information data structure (loaded from a .yaml file) and file path
     //protected GameInformation gameInformation;
 
-    protected ArrayList<String> salida;
+    protected static ArrayList<String> salida;
     protected static long executionTime = 0;
+	static double runTime; //Tiempo, en milisegundos, total utilizado
 
     public MinizincInterface(GameInformation gameInf) {
     	//Inicializar variables
@@ -43,13 +44,16 @@ public class MinizincInterface {
     }
     
     public String plan(StateObservation state, ElapsedCpuTimer timer) {
-    	
+		long tInicio = System.nanoTime();
+
     	generate_dzn(state);
     	ArrayList<String> salida = execute_solver();
     	String goals = translate_to_PDDL(salida);
     	
     	executionTime+=timer.elapsedMillis();
     	
+		runTime = (System.nanoTime()-tInicio)/1000000.0;
+
     	return goals;
     }
     
@@ -117,7 +121,7 @@ public class MinizincInterface {
         	}
         }
         
-    	//Guardamos en gameState en el fichero de salida
+    	//Guardamos el gameState en el fichero de salida
         File outputDataFile = new File(gameInformation.dzn_dataFile);
 
         if (outputDataFile.getParentFile() != null) {
@@ -149,5 +153,12 @@ public class MinizincInterface {
     	}
     	
 		return goals;
+    }
+    
+    public static void displayStats() {
+        System.out.println("\n----MiniZinc STATS----\n");
+        System.out.println("Execution time: " + executionTime + " ms");
+        System.out.println("Run time: " + runTime + " ms");
+        System.out.println("Salida: " + MinizincInterface.salida );
     }
 }

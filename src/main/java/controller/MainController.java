@@ -99,7 +99,7 @@ public class MainController extends AbstractPlayer{
 			}
 		
 		try {
-			Thread.sleep(100);
+			Thread.sleep(0);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

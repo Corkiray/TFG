@@ -15,7 +15,7 @@ public class Test2 {
     public static void main(String[] args) {
 
 		// Available tracks:
-    	String controlador = "controller.MainAgent";
+    	String controlador = "controller.AStarController";
     	
     	String sampleRandomController = "tracks.singlePlayer.simple.sampleRandom.Agent";
 		String doNothingController = "tracks.singlePlayer.simple.doNothing.Agent";

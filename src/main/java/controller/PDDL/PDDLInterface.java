@@ -77,6 +77,7 @@ public class PDDLInterface {
     public static String goal;
     
     // Runtime information
+	static double runTime; //Tiempo, en milisegundos, total utilizado
     protected static long executionTime = 0;
     protected static int callsPlan = 0;
 
@@ -120,6 +121,7 @@ public class PDDLInterface {
                 e.printStackTrace();
             }
             
+            runTime = 0;
         }
     }
 
@@ -385,10 +387,11 @@ public class PDDLInterface {
      * the planner was called and the number of discrepancies that were found.
      */
     public static void displayStats() {
-        System.out.println("\n----STATS----\n");
+        System.out.println("\n----PDDL STATS----\n");
         System.out.println("Execution time: " + PDDLInterface.executionTime + " ms");
+        System.out.println("Run time: " + runTime + " ms");
         System.out.println("Goal:\n" + PDDLInterface.goal);
-        System.out.println("Number of time the plan was called: " + PDDLInterface.callsPlan);
+        System.out.println("Number of Actions: " + PDDLInterface.callsPlan);
     }
 
 
@@ -469,7 +472,9 @@ public class PDDLInterface {
     }
 
 	public ArrayList<ArrayList<String>> findplan(StateObservation state, ElapsedCpuTimer timer) {	
-        // Translate game state to PDDL predicates
+		long tInicio = System.nanoTime();
+
+		// Translate game state to PDDL predicates
         translateGameStateToPDDL(state);
 
         // SHOW DEBUG INFORMATION
@@ -506,6 +511,9 @@ public class PDDLInterface {
         }
         
         executionTime = timer.elapsedMillis();
+        
+		runTime = (System.nanoTime()-tInicio)/1000000.0;
+
 
 		return translated_plan;
 	}

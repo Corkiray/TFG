@@ -1,10 +1,11 @@
 
 
+import java.io.IOException;
 import java.util.Random;
 
 import controller.PDDL.PDDLInterface;
 import controller.*;
-
+import controller.MiniZinc.MinizincInterface;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -17,7 +18,7 @@ public class GeneralTest {
 
 	private int gameIdx = 122;
 
-	private int levelIdx = 0;
+	private int levelIdx = 3;
 
 	private String configurationFile = "config/mochilero.yaml";
 
@@ -54,7 +55,7 @@ public class GeneralTest {
 		String level = game.replace(gameName, gameName + "_lvl" + test.levelIdx);
 
 		// Controller
-		String controller = "tracks.singlePlayer.advanced.sampleMCTS.Agent";
+		String controller = "controller.LRTAStarKController";
 
 		// Find out if the game has to be played by a human or by the agent
 		boolean humanPlayer = false;
@@ -63,11 +64,22 @@ public class GeneralTest {
 		if (humanPlayer) {
 			ArcadeMachine.playOneGame(game, level, null, seed);
 		} else {
+	        ProcessBuilder processBuilder = new ProcessBuilder();
+	        processBuilder.command("cmd.exe", "/c", 
+	        		"wsl minizinc");
+	        try {
+				Process process = processBuilder.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        
 			MainController.setGameConfigFile(test.configurationFile);
 			PDDLInterface.setDebugMode(test.debugMode);
 			PDDLInterface.setSaveInformation(test.saveOutput);
 			ArcadeMachine.runOneGame(game, level, visuals, controller, null, seed, 0);
 			PDDLInterface.displayStats();
+			MinizincInterface.displayStats();
 		}
     }
 }

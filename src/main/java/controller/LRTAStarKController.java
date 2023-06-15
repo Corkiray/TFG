@@ -51,7 +51,7 @@ public class LRTAStarKController extends AbstractPlayer{
 		minizincInterface = new MinizincInterface(gameInformation);
 		pddlInterface = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state, true);
-		agent = new AgentLRTAStarK(100);
+		agent = new AgentLRTAStarK(1);
 		
 		plan = new ArrayList<ACTIONS>();
 
@@ -117,12 +117,13 @@ public class LRTAStarKController extends AbstractPlayer{
 				hayAgentObjetive = false;	
 		}
 		
-		
+		/*
 		try {
 			Thread.sleep(0);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		*/
 		
 		return action;
 	}
