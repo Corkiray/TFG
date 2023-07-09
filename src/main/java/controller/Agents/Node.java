@@ -28,7 +28,6 @@ public class Node {
 	
 	public static boolean RTA_MODE;
 	
-    public static GameInformation gameInformation;
         
     public static int MAX_X;
     public static int MAX_Y;
@@ -75,9 +74,7 @@ public class Node {
 
 	
 	
-	public static void initialize(GameInformation gameInf, StateObservation state) {
-		gameInformation = gameInf;
-				
+	public static void initialize(GameInformation gameInf, StateObservation state) {			
 		MAX_X = state.getObservationGrid().length;
 		MAX_Y =	state.getObservationGrid()[0].length;
 		

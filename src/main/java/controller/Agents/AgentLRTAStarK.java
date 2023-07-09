@@ -17,7 +17,7 @@ public class AgentLRTAStarK{
 	
 	ArrayList<Node> explorados;
 	
-	int k;
+	private int k;
 	
 	int nExpandidos; //Número de nodos que han sido expandidos
 	int maxMem; //Número máximo de nodos almacenados en memoria

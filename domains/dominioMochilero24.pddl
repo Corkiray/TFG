@@ -4,7 +4,7 @@
         Recurso
     )    
     (:constants
-        Recurso1 Recurso2 Recurso3 Recurso4 Recurso5 Recurso6 Recurso7 - Recurso
+        Recurso1 Recurso2 Recurso3 Recurso4 Recurso5 Recurso6 Recurso7 Recurso8 Recurso9 Recurso10 Recurso11 Recurso12 Recurso13 Recurso14 Recurso15 Recurso16 Recurso17 Recurso18 Recurso19 Recurso20 Recurso21 Recurso22 Recurso23 Recurso24 - Recurso
     )
     (:functions
         (peso ?r - Recurso)

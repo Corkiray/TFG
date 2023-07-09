@@ -23,15 +23,17 @@ public class MainController extends AbstractPlayer{
     public static String gameConfigFile;
 
     public MinizincInterface minizincInterface;
-	public PDDLInterface pddlInterface;
+	public PDDLInterface pddlPlanner;
 	public AgentAStar agent;
-	public Node actualNode;
+	public Node currenNode;
 
 	ArrayList<String> agentGoal;
 	
 	public boolean hayPDDLPlan;
 	public boolean hayAgentObjetive;
 	public boolean agentNeedsReplan;
+	
+	public ArrayList<ACTIONS> plan;
 
 	private GameInformation gameInformation;
 
@@ -40,25 +42,26 @@ public class MainController extends AbstractPlayer{
 		Yaml yaml = new Yaml(new Constructor(GameInformation.class));
 		
 		try {
-			InputStream inputStream = new FileInputStream(new File(gameConfigFile));
+			InputStream inputStream = new FileInputStream(new File(MainController.gameConfigFile));
 			this.gameInformation = yaml.load(inputStream);
 		} catch (FileNotFoundException e) {
 			System.out.println(e.getStackTrace());
 		}
 		
 		minizincInterface = new MinizincInterface(gameInformation);
-		pddlInterface = new PDDLInterface(gameInformation);
+		pddlPlanner = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state);
 		agent = new AgentAStar();
 
 		hayPDDLPlan = false;
 		hayAgentObjetive = false;
 		agentNeedsReplan = false;
-		
+				
+		plan = new ArrayList<ACTIONS> ();
 	}
 	
     public static void setGameConfigFile(String path) {
-        MainController.gameConfigFile = path;
+    	MainController.gameConfigFile = path;
     }
 
 	public ACTIONS act(StateObservation state, ElapsedCpuTimer timer) {
@@ -66,46 +69,67 @@ public class MainController extends AbstractPlayer{
 		
 		if (!hayPDDLPlan) {
 			String goals = minizincInterface.plan(state, timer);
+			MinizincInterface.displayStats();
+			
 			System.out.print("\n"+goals+"\n");
 			
 			
-			pddlInterface.set_goal(goals);
-			ArrayList<ArrayList<String>> plan = pddlInterface.findplan(state, timer);
+			pddlPlanner.set_goal(goals);
+			ArrayList<ArrayList<String>> plan = pddlPlanner.findplan(state, timer);
+			PDDLInterface.displayStats();
+
 			System.out.print("\n"+plan+"\n");
 					
-			
 			hayPDDLPlan = true;
 		}
 		else if(!hayAgentObjetive){
-			agentGoal = pddlInterface.getNextAction();
+			agentGoal = pddlPlanner.getNextAction();
 			System.out.print(agentGoal);
 
-			//ArrayList<String> exit = new ArrayList<String>();
-			//exit.add("exit");
-			//Node.setObjetive(exit , state);
-			
-			Node.setObjetive(agentGoal , state);
+			Node.setObjetive(agentGoal, state);
+
+			if(agentGoal.get(0).contentEquals("drop")) {
+				plan = Dropper.plan(state);
+			}
+			else {				
+				agent.plan(state, timer);
+			}
 			
 			hayAgentObjetive = true;
 		}
+		else if(agentNeedsReplan) {			
+
+			agent.plan(state, timer);
+			agentNeedsReplan=false;
+		}
 		else {
-				actualNode = agent.act(state);
-				
-				if(actualNode.h==0)
-					hayAgentObjetive = false;
-				action = actualNode.accion;
-				
-				System.out.print(action);
+			
+			if(!plan.isEmpty()) {
+				action =  plan.remove(0);
 			}
+			else {				
+				currenNode = agent.act(state);
+				if(currenNode == null) {
+					agentNeedsReplan=true;
+				}
+				else {
+					action = currenNode.get_action();
+					if(action==ACTIONS.ACTION_NIL)
+						hayAgentObjetive = false;
+				}
+			}
+			System.out.print(action);
+		}
 		
+		/*
 		try {
-			Thread.sleep(0);
+			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		*/
 		
 		return action;
 	}
 
 }
-

@@ -7,7 +7,7 @@ import ontology.Types.ACTIONS;
 import tools.Vector2d;
 
 public class Dropper {
-	public static final ArrayList<Vector2d> orientations = new ArrayList<Vector2d>(
+	private static final ArrayList<Vector2d> orientations = new ArrayList<Vector2d>(
 		    new ArrayList<Vector2d>() {{
 		        add(new Vector2d(-1, 0));
 		        add(new Vector2d(1, 0));

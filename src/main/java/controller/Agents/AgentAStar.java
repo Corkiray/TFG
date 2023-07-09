@@ -17,12 +17,7 @@ import tools.Vector2d;
 import core.vgdl.VGDLRegistry;
 
 public class AgentAStar{
-	
-	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
-			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
-
-	public static Vector2d fescala;
-	
+		
 	boolean hayPlan;
 	ArrayList <Node> plan;
 	

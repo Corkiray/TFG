@@ -19,13 +19,8 @@ import core.vgdl.VGDLRegistry;
 
 public class AgentDStarLite{
 	
-	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
-			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE};
-
-	public static Vector2d fescala;
-	
-	boolean hayPlan;
-	ArrayList <Node> plan;
+	private boolean hayPlan;
+	private ArrayList <Node> plan;
 	
 	int nExpandidos; //Número de nodos que han sido expandidos
 	int maxMem; //Número máximo de nodos almacenados en memoria
@@ -34,14 +29,14 @@ public class AgentDStarLite{
 	double totalRunTime; //Tiempo, en milisegundos, total utilizado
 	double runTime;
 	
-	PriorityQueue<Node> abiertos;
+	private PriorityQueue<Node> abiertos;
 	//Lista donde se guardarán los nodos explorados
-	ArrayList<Node> explorados;
+	private ArrayList<Node> explorados;
 
-	Node inicial;
-	Node goal;
+	private Node inicial;
+	private Node objetivo;
 	
-	int km;
+	private int km;
 
 	
 	/**
@@ -83,7 +78,7 @@ public class AgentDStarLite{
 		//Recorro los padres desde el nodo dado hasta el nodo inicial, y voy guardándolos al principio del plan
 		plan.clear();
 		Node ultimo = inicial;
-		while(!ultimo.equals(goal)) {
+		while(!ultimo.equals(objetivo)) {
 			//System.out.print(ultimo);
 			plan.add(ultimo);
 			ultimo = ultimo.hijo;			
@@ -137,13 +132,13 @@ public class AgentDStarLite{
 		inicial.g = Double.POSITIVE_INFINITY;
 		inicial.h=0;
 		
-		goal = Node.GoalNode(state);
-		goal.h = goal.get_relative_h_from(inicial);
-		goal.g = Double.POSITIVE_INFINITY;
-		goal.rhs = 0;
+		objetivo = Node.GoalNode(state);
+		objetivo.h = objetivo.get_relative_h_from(inicial);
+		objetivo.g = Double.POSITIVE_INFINITY;
+		objetivo.rhs = 0;
 		
-		abiertos.add(goal);
-		explorados.add(goal);
+		abiertos.add(objetivo);
+		explorados.add(objetivo);
 
 		maxMem++;
 		
@@ -151,7 +146,7 @@ public class AgentDStarLite{
 
 	}
 	
-	public void UpdateVertex(Node node) {	
+	private void UpdateVertex(Node node) {	
 		if(abiertos.contains(node)) abiertos.remove(node);
 		node.update_key(km, inicial);
 		if(node.g != node.rhs) abiertos.add(node);
@@ -159,7 +154,7 @@ public class AgentDStarLite{
 	}
 	
 	//Algoritmo AStar
-	public void ComputeShortestPath() {
+	private void ComputeShortestPath() {
 		//Cola donde se guardarán, por orden de prioridad, los nodos a explorar
 		Node actual; //Nodo que se está explorando
 		double g_old = -1000;
@@ -195,7 +190,7 @@ public class AgentDStarLite{
 				recalculate=true;
 				g_old = actual.g;
 				actual.g = Double.POSITIVE_INFINITY;
-				if((!actual.equals(goal))
+				if((!actual.equals(objetivo))
 				&& (actual.rhs == g_old))
 					actual.rhs = actual.update_bestChild().g+1;
 				UpdateVertex(actual);
@@ -278,7 +273,7 @@ public class AgentDStarLite{
 
 
 	public boolean is_goal(Node actual) {
-		if(actual.x == goal.x && actual.y == goal.y)
+		if(actual.x == objetivo.x && actual.y == objetivo.y)
 			return true;
 		else
 			return false;

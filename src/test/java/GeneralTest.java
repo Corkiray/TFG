@@ -18,7 +18,7 @@ public class GeneralTest {
 
 	private int gameIdx = 122;
 
-	private int levelIdx = 3;
+	private int levelIdx = 2;
 
 	private String configurationFile = "config/mochilero.yaml";
 

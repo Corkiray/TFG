@@ -13,10 +13,6 @@ import tools.Vector2d;
 
 public class AgentRTAStar{
 	
-	public static ACTIONS[] PosibleActions = new ACTIONS[] {ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, 
-			ACTIONS.ACTION_DOWN, ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_USE, ACTIONS.ACTION_NIL};
-
-	boolean hayPlan;
 	ArrayList <ACTIONS> plan;
 	
 	ArrayList<Node> explorados;
@@ -38,7 +34,6 @@ public class AgentRTAStar{
 		explorados = new ArrayList<Node>();
 		
 		//Inicializo el plan a vacío
-		hayPlan = false;
 		plan = new ArrayList<ACTIONS>();
 		
 		//Inicializo los resultados a 0
@@ -98,7 +93,7 @@ public class AgentRTAStar{
 	}
 	
 	//Algoritmo RTAstar
-	public ArrayList<ACTIONS> RTAStar(Node actual) {
+	private ArrayList<ACTIONS> RTAStar(Node actual) {
 		nExpandidos++; //Cada vez que llamo al algoritmo, expando el nodo en el que está el avatar.
 		
 

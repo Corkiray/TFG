@@ -36,6 +36,8 @@ public class LRTAStarKController extends AbstractPlayer{
 	private GameInformation gameInformation;
 	
 	ArrayList<ACTIONS> plan;
+	
+	int k = 100;
 
 	public LRTAStarKController(StateObservation state, ElapsedCpuTimer timer) {
 		// Load game information
@@ -51,7 +53,7 @@ public class LRTAStarKController extends AbstractPlayer{
 		minizincInterface = new MinizincInterface(gameInformation);
 		pddlInterface = new PDDLInterface(gameInformation);
 		Node.initialize(gameInformation, state, true);
-		agent = new AgentLRTAStarK(1);
+		agent = new AgentLRTAStarK(k);
 		
 		plan = new ArrayList<ACTIONS>();
 

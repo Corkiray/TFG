@@ -35,6 +35,11 @@ pddlCorrespondence:
   - (requiere Recurso6 Recurso5)
   - (= (peso Recurso6) 0)
   - (= (posicion Recurso6) 6)
+  recurso7:
+  - (enSuelo Recurso7)
+  - (requiere Recurso7 Recurso6)
+  - (= (peso Recurso7) 2)
+  - (= (posicion Recurso7) 7)
   avatar:
   - (= (maxPeso) 10)
   - (= (actualPeso) 0)
@@ -69,6 +74,11 @@ minizincCorrespondence:
       - recurso6=1;
       no_existe:
       - recurso6=0;
+  recurso7:
+      existe:
+      - recurso7=1;
+      no_existe:
+      - recurso7=0;
 minizinc_to_PDDL_correspondence:
   default: (not (haySalida))
   recurso1=1: (enMochila Recurso1)
@@ -77,6 +87,7 @@ minizinc_to_PDDL_correspondence:
   recurso4=1: (enMochila Recurso4)
   recurso5=1: (enMochila Recurso5)
   recurso6=1: (enMochila Recurso6)
+  recurso7=1: (enMochila Recurso7)
 pddl_to_agent_correspondence:
   COGER: take
   RECURSO1: recurso1
@@ -85,6 +96,7 @@ pddl_to_agent_correspondence:
   RECURSO4: recurso4
   RECURSO5: recurso5
   RECURSO6: recurso6
+  RECURSO7: recurso7
   SALIR: closedoor
   SOLTAR: drop
 values_correspondence:
@@ -100,5 +112,7 @@ values_correspondence:
   recurso5_score: 5
   recurso6_peso: 0
   recurso6_score: 5
+  recurso7_peso: 2
+  recurso7_score: 4
   maxPeso: 10
 

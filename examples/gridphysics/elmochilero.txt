@@ -27,6 +27,7 @@ BasicGame
      recurso4 > img=israel_set/recurso4 singleton=True
      recurso5 > img=israel_set/recurso5 singleton=True
      recurso6 > img=israel_set/recurso6 singleton=True
+     recurso7 > img=israel_set/recurso6 singleton=True
      peso > limit=10
      
     rkey > Resource hidden=True invisible=True
@@ -36,6 +37,7 @@ BasicGame
      r4key >
      r5key >
      r6key >
+     r7key >
      
     enemy > RandomNPC cooldown=3 cons=6 img=oryx/bat1
 
@@ -54,6 +56,7 @@ BasicGame
     4 > recurso4 r4key unknownFloor background
     5 > recurso5 r5key unknownFloor background
     6 > recurso6 r6key unknownFloor background
+    7 > recurso7 r7key unknownFloor background
    
 
   InteractionSet
@@ -73,6 +76,7 @@ BasicGame
     dropper floor > transformAndChangeResource stype=recurso4 avatar=avatar resource=peso value=-4 scoreChange=-4
     dropper floor > transformAndChangeResource stype=recurso5 avatar=avatar resource=peso value=-2 scoreChange=-5
     dropper floor > transformAndChangeResource stype=recurso6 avatar=avatar resource=peso value=0 scoreChange=-5
+    dropper floor > transformAndChangeResource stype=recurso7 avatar=avatar resource=peso value=-2 scoreChange=-4
 
     avatar r1key > killIfHeld heldResource=Null
     avatar r2key > killIfHeld heldResource=r1key
@@ -80,6 +84,7 @@ BasicGame
     avatar r4key > killIfHeld heldResource=r3key
     avatar r5key > killIfHeld heldResource=r4key
     avatar r6key > killIfHeld heldResource=r5key
+    avatar r7key > killIfHeld heldResource=r6key
 
     avatar recurso1 > changeResourceIfHeld heldResource=Null resource=peso value=1 scoreChange=1
     avatar recurso2 > changeResourceIfHeld heldResource=r1key resource=peso value=2 scoreChange=2
@@ -87,8 +92,10 @@ BasicGame
     avatar recurso4 > changeResourceIfHeld heldResource=r3key resource=peso value=4 scoreChange=4
     avatar recurso5 > changeResourceIfHeld heldResource=r4key resource=peso value=2 scoreChange=5
     avatar recurso6 > changeResourceIfHeld heldResource=r5key resource=peso value=0 scoreChange=5
+    avatar recurso7 > changeResourceIfHeld heldResource=r6key resource=peso value=2 scoreChange=4
 			
     enemy background > refreshVisionState avatar=avatar range=4
+    
     unknownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
     knownFloor background > transformIfAvatarNear avatar=avatar range=4 stype=visibleFloor
     visibleFloor background > transformIfAvatarFar avatar=avatar range=4 stype=knownFloor
