@@ -37,7 +37,7 @@ public class LRTAStarKController extends AbstractPlayer{
 	
 	ArrayList<ACTIONS> plan;
 	
-	int k = 100;
+	int k = 10;
 
 	public LRTAStarKController(StateObservation state, ElapsedCpuTimer timer) {
 		// Load game information

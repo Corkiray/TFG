@@ -1,10 +1,5 @@
-wwwwwwwwwwwwwwwwwww
-w.........6...4...w
-w.2....5..........w
-w.......7...wwwwwww
-w...w.A....ww....3w
-w...w.www.www.w.www
-w...w.w.w.......www
-w...w.w.wwww.ww.w.w
-w.1......ewwww....w
-wwwwwwwwwwwwwwwwwww
+wwwwwwww
+w2.1wwew
+w4A3ww.w
+w5.6...w
+wwwwwwww

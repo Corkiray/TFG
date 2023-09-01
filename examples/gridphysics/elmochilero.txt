@@ -65,7 +65,7 @@ BasicGame
     avatar enemy > killSprite
 
     avatar closedoor > spawnIfHasMore stype=opendoor resource=peso limit=1
-    avatar opendoor > killSprite
+    avatar opendoor > killSprite scoreChange=+10
     closedoor opendoor > killSprite
 
     dropper wall recurso > killSprite
@@ -76,7 +76,6 @@ BasicGame
     dropper floor > transformAndChangeResource stype=recurso4 avatar=avatar resource=peso value=-4 scoreChange=-4
     dropper floor > transformAndChangeResource stype=recurso5 avatar=avatar resource=peso value=-2 scoreChange=-5
     dropper floor > transformAndChangeResource stype=recurso6 avatar=avatar resource=peso value=0 scoreChange=-5
-    dropper floor > transformAndChangeResource stype=recurso7 avatar=avatar resource=peso value=-2 scoreChange=-4
 
     avatar r1key > killIfHeld heldResource=Null
     avatar r2key > killIfHeld heldResource=r1key
@@ -84,7 +83,6 @@ BasicGame
     avatar r4key > killIfHeld heldResource=r3key
     avatar r5key > killIfHeld heldResource=r4key
     avatar r6key > killIfHeld heldResource=r5key
-    avatar r7key > killIfHeld heldResource=r6key
 
     avatar recurso1 > changeResourceIfHeld heldResource=Null resource=peso value=1 scoreChange=1
     avatar recurso2 > changeResourceIfHeld heldResource=r1key resource=peso value=2 scoreChange=2
@@ -92,7 +90,6 @@ BasicGame
     avatar recurso4 > changeResourceIfHeld heldResource=r3key resource=peso value=4 scoreChange=4
     avatar recurso5 > changeResourceIfHeld heldResource=r4key resource=peso value=2 scoreChange=5
     avatar recurso6 > changeResourceIfHeld heldResource=r5key resource=peso value=0 scoreChange=5
-    avatar recurso7 > changeResourceIfHeld heldResource=r6key resource=peso value=2 scoreChange=4
 			
     enemy background > refreshVisionState avatar=avatar range=4
     
@@ -103,7 +100,6 @@ BasicGame
     unknownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
     knownWall background > transformIfAvatarNear avatar=avatar range=4 stype=visibleWall
     visibleWall background > transformIfAvatarFar avatar=avatar range=4 stype=knownWall
-
 	
   TerminationSet
     SpriteCounter stype=closedoor  win=True

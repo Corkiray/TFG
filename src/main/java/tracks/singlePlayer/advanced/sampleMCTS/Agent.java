@@ -17,7 +17,8 @@ import tools.ElapsedCpuTimer;
  */
 public class Agent extends AbstractPlayer {
 
-    public int num_actions;
+    public static final int MCTS_ITERATIONS = 10_000;
+	public int num_actions;
     public Types.ACTIONS[] actions;
 
     protected SingleMCTSPlayer mctsPlayer;

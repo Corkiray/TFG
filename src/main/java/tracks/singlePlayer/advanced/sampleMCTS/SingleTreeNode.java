@@ -50,27 +50,30 @@ public class SingleTreeNode
 
     public void mctsSearch(ElapsedCpuTimer elapsedTimer) {
 
-        double avgTimeTaken = 0;
-        double acumTimeTaken = 0;
-        long remaining = elapsedTimer.remainingTimeMillis();
+        //double avgTimeTaken = 0;
+        //double acumTimeTaken = 0;
+        //long remaining = elapsedTimer.remainingTimeMillis();
         int numIters = 0;
 
-        int remainingLimit = 5;
-        while(remaining > 2*avgTimeTaken && remaining > remainingLimit){
-        //while(numIters < Agent.MCTS_ITERATIONS){
+        //int remainingLimit = 5;
+        //while(remaining > 2*avgTimeTaken && remaining > remainingLimit){
+        while(numIters < Agent.MCTS_ITERATIONS){
 
             StateObservation state = rootState.copy();
 
-            ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
+            //ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
             SingleTreeNode selected = treePolicy(state);
             double delta = selected.rollOut(state);
             backUp(selected, delta);
 
             numIters++;
-            acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
+            //acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
             //System.out.println(elapsedTimerIteration.elapsedMillis() + " --> " + acumTimeTaken + " (" + remaining + ")");
-            avgTimeTaken  = acumTimeTaken/numIters;
-            remaining = elapsedTimer.remainingTimeMillis();
+            //avgTimeTaken  = acumTimeTaken/numIters;
+            //remaining = elapsedTimer.remainingTimeMillis();
+            if(numIters%1000==0) {
+            	System.out.println("Iteracion: " + numIters);            	
+            }
         }
     }
 

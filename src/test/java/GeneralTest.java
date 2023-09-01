@@ -18,7 +18,7 @@ public class GeneralTest {
 
 	private int gameIdx = 122;
 
-	private int levelIdx = 2;
+	private int levelIdx = 1;
 
 	private String configurationFile = "config/mochilero.yaml";
 
@@ -55,7 +55,7 @@ public class GeneralTest {
 		String level = game.replace(gameName, gameName + "_lvl" + test.levelIdx);
 
 		// Controller
-		String controller = "controller.LRTAStarKController";
+		String controller = "controller.DStarLiteController";
 
 		// Find out if the game has to be played by a human or by the agent
 		boolean humanPlayer = false;
